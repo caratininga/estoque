@@ -32,6 +32,10 @@
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         .dark ::-webkit-scrollbar-thumb { background: #475569; }
         .dark ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        
+        /* Animation for sorting arrow */
+        .sort-icon { transition: transform 0.2s; }
+        .sort-asc { transform: rotate(180deg); }
     </style>
 </head>
 <body>
@@ -68,6 +72,8 @@
             acc[key] = createLucideIcon(key, LucideObj.icons[key]);
             return acc;
         }, {});
+        
+        // Fallback for missing icons
         const IconFallback = () => <span />;
         const { 
             TrendingDown = IconFallback, Calendar = IconFallback, AlertCircle = IconFallback, 
@@ -77,7 +83,8 @@
             Info = IconFallback, DollarSign = IconFallback, Activity = IconFallback, 
             ShoppingCart = IconFallback, PackageX = IconFallback, BarChart3 = IconFallback, 
             Moon = IconFallback, Sun = IconFallback, Filter = IconFallback, FileX = IconFallback,
-            FileText = IconFallback, ArrowUpDown = IconFallback, Printer = IconFallback
+            FileText = IconFallback, ArrowUpDown = IconFallback, Printer = IconFallback,
+            ArrowUp = IconFallback, ArrowDown = IconFallback
         } = LucideIcons;
 
         // --- UTILITÁRIOS ---
@@ -98,6 +105,13 @@
                 lento: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100'
             };
             return <span className={`px-2 py-1 rounded text-xs font-bold ${colors[type] || colors.ok}`}>{text}</span>;
+        };
+
+        const SortIcon = ({ active, direction }) => {
+            if (!active) return <ArrowUpDown size={14} className="ml-1 text-slate-400" />;
+            return direction === 'ascending' 
+                ? <ArrowUp size={14} className="ml-1 text-blue-600 dark:text-blue-400" /> 
+                : <ArrowDown size={14} className="ml-1 text-blue-600 dark:text-blue-400" />;
         };
 
         const LoginScreen = ({ onLogin }) => {
@@ -169,8 +183,8 @@
             const atual = dadosUnidade.contagens[indicePeriodo];
             const anterior = dadosUnidade.contagens[indicePeriodo - 1];
             const catalogo = getCatalogoPorData(catalogoFull, atual.data);
-            const keyPeriodo = `${anterior.data}_${atual.data}`;
             
+            const keyPeriodo = `${anterior.data}_${atual.data}`;
             const vendas = dadosUnidade.vendas[keyPeriodo] || {};
             const entradas = dadosUnidade.entradas[keyPeriodo] || {};
 
@@ -259,7 +273,7 @@
             const [loading, setLoading] = useState(true);
             const [error, setError] = useState(null);
 
-            // Fetch helper para evitar crash com erro de URL
+            // Fetch helper
             const safeFetch = async (url) => {
                 try {
                     const res = await fetch(url);
@@ -267,7 +281,7 @@
                     return await res.json();
                 } catch (e) {
                     console.warn(`Fetch falhou para: ${url}`, e);
-                    return null; // Retorna null para indicar falha sem quebrar
+                    return null; 
                 }
             };
 
@@ -348,6 +362,10 @@
             const [theme, setTheme] = useState('system');
             const [isDark, setIsDark] = useState(false);
             const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
+            
+            // Estado para o modal de geração de ficha
+            const [showFichaModal, setShowFichaModal] = useState(false);
+            const [fichaCategoria, setFichaCategoria] = useState('TODAS');
 
             useEffect(() => {
                 const check = () => window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -452,16 +470,16 @@
                 const latestKey = Object.keys(catalogoFull).sort().reverse()[0];
                 const catalogo = catalogoFull[latestKey];
                 
-                // Filtrar por categoria se necessário
+                // Filtrar por categoria selecionada no modal
                 const produtosFiltrados = Object.keys(catalogo)
                     .map(key => catalogo[key])
-                    .filter(p => categoriaSelecionada === 'TODAS' || p.categoria === categoriaSelecionada)
+                    .filter(p => fichaCategoria === 'TODAS' || p.categoria === fichaCategoria)
                     .sort((a, b) => a.nome.localeCompare(b.nome));
 
                 const html = `
                     <html>
                     <head>
-                        <title>Ficha de Contagem - ${categoriaSelecionada}</title>
+                        <title>Ficha de Contagem - ${fichaCategoria}</title>
                         <style>
                             body { font-family: Arial, sans-serif; font-size: 12px; }
                             table { width: 100%; border-collapse: collapse; margin-top: 20px; }
@@ -477,7 +495,7 @@
                         <div class="header">
                             <div>
                                 <h1>Ficha de Contagem de Estoque</h1>
-                                <p><strong>Categoria:</strong> ${categoriaSelecionada === 'TODAS' ? 'Geral' : categoriaSelecionada}</p>
+                                <p><strong>Categoria:</strong> ${fichaCategoria === 'TODAS' ? 'Geral' : fichaCategoria}</p>
                                 <p><strong>Data:</strong> ____/____/_______</p>
                                 <p><strong>Responsável:</strong> ________________________</p>
                             </div>
@@ -489,10 +507,10 @@
                                 <tr>
                                     <th style="width: 40%">Produto</th>
                                     <th style="width: 15%">Categoria</th>
-                                    <th>Prateleira</th>
-                                    <th>Geladeira</th>
-                                    <th>Depósito</th>
-                                    <th>Extra</th>
+                                    <th>Local 1</th>
+                                    <th>Local 2</th>
+                                    <th>Local 3</th>
+                                    <th>Local 4</th>
                                     <th style="background-color: #e0e0e0">TOTAL</th>
                                 </tr>
                             </thead>
@@ -516,6 +534,7 @@
                 
                 win.document.write(html);
                 win.document.close();
+                setShowFichaModal(false);
             };
 
             if (!isAuthenticated) return <LoginScreen onLogin={() => setIsAuthenticated(true)} />;
@@ -534,17 +553,42 @@
                         </div>
                         <div className="flex items-center gap-4 text-xs">
                             {/* Botão Tema */}
-                            <button onClick={() => setTheme(prev => prev === 'dark' ? 'light' : 'dark')} className="p-1.5 rounded-full hover:bg-slate-700 transition-colors" title="Tema">
+                            <button onClick={() => setTheme(prev => prev === 'dark' ? 'light' : 'dark')} className="p-1.5 rounded-full hover:bg-slate-700 transition-colors" title="Alternar Tema">
                                 {isDark ? <Sun size={16} /> : <Moon size={16} />}
                             </button>
-                             {/* Botão Gerar Ficha */}
-                             <button onClick={gerarFichaContagem} className="p-1.5 px-3 rounded-full hover:bg-blue-600 bg-blue-500 text-white transition-colors flex items-center gap-1" title="Gerar Ficha">
+                             {/* Botão Abrir Modal de Ficha */}
+                             <button onClick={() => setShowFichaModal(true)} className="p-1.5 px-3 rounded-full hover:bg-blue-600 bg-blue-500 text-white transition-colors flex items-center gap-1" title="Gerar Ficha">
                                 <Printer size={14} /> Ficha
                             </button>
                             <div className="hidden md:flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Online</div>
                             <button onClick={() => setIsAuthenticated(false)} className="hover:text-red-300 transition-colors">Sair</button>
                         </div>
                     </div>
+
+                    {/* Modal de Geração de Ficha */}
+                    {showFichaModal && (
+                        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                            <div className={`p-6 rounded-xl shadow-xl w-full max-w-sm ${isDark ? 'bg-slate-800 text-white' : 'bg-white text-slate-800'}`}>
+                                <h3 className="text-lg font-bold mb-4">Gerar Ficha de Contagem</h3>
+                                <div className="mb-4">
+                                    <label className="block text-sm font-medium mb-1">Filtrar por Categoria</label>
+                                    <select 
+                                        value={fichaCategoria}
+                                        onChange={(e) => setFichaCategoria(e.target.value)}
+                                        className={`w-full border rounded p-2 text-sm ${isDark ? 'bg-slate-700 border-slate-600' : 'bg-slate-50 border-slate-200'}`}
+                                    >
+                                        {categoriasDisponiveis.map(cat => (
+                                            <option key={cat} value={cat}>{cat === 'TODAS' ? 'Todas as Categorias' : cat}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="flex justify-end gap-2">
+                                    <button onClick={() => setShowFichaModal(false)} className="px-4 py-2 text-sm rounded hover:bg-slate-200 dark:hover:bg-slate-700">Cancelar</button>
+                                    <button onClick={gerarFichaContagem} className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 font-bold">Gerar & Imprimir</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Controls */}
                     <header className={`border-b sticky top-0 z-30 px-6 py-4 shadow-sm transition-colors ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
@@ -776,15 +820,15 @@
                                             <table className="w-full text-sm text-left">
                                                 <thead className={`font-semibold border-b whitespace-nowrap ${isDark ? 'bg-slate-900 text-slate-400 border-slate-700' : 'bg-slate-50 text-slate-500 border-slate-200'}`}>
                                                     <tr>
-                                                        <th className="px-4 py-3 cursor-pointer hover:bg-black/5" onClick={() => requestSort('nome')}>Produto <ArrowUpDown size={12} className="inline ml-1" /></th>
-                                                        <th className="px-4 py-3 text-center cursor-pointer hover:bg-black/5" onClick={() => requestSort('inicial')}>Anterior <ArrowUpDown size={12} className="inline ml-1" /></th>
-                                                        <th className="px-4 py-3 text-center text-green-600 cursor-pointer hover:bg-black/5" onClick={() => requestSort('entrada')}>(+) Ent. <ArrowUpDown size={12} className="inline ml-1" /></th>
-                                                        <th className="px-4 py-3 text-center text-red-400 cursor-pointer hover:bg-black/5" onClick={() => requestSort('vendas')}>(-) Sai. <ArrowUpDown size={12} className="inline ml-1" /></th>
-                                                        <th className="px-4 py-3 text-center text-blue-500 cursor-pointer hover:bg-black/5" onClick={() => requestSort('teorico')}>(=) Teórico <ArrowUpDown size={12} className="inline ml-1" /></th>
-                                                        <th className="px-4 py-3 text-center bg-slate-100 dark:bg-slate-700/50 cursor-pointer hover:bg-black/5" onClick={() => requestSort('final')}>Atual <ArrowUpDown size={12} className="inline ml-1" /></th>
-                                                        <th className="px-4 py-3 text-center cursor-pointer hover:bg-black/5" onClick={() => requestSort('diferenca')}>Dif. <ArrowUpDown size={12} className="inline ml-1" /></th>
-                                                        <th className="px-4 py-3 text-right cursor-pointer hover:bg-black/5" onClick={() => requestSort('perdaFinanceira')}>Perda R$ <ArrowUpDown size={12} className="inline ml-1" /></th>
-                                                        <th className="px-4 py-3 text-center cursor-pointer hover:bg-black/5" onClick={() => requestSort('status')}>Status <ArrowUpDown size={12} className="inline ml-1" /></th>
+                                                        <th className="px-4 py-3 cursor-pointer hover:bg-black/5" onClick={() => requestSort('nome')}>Produto <SortIcon active={sortConfig.key === 'nome'} direction={sortConfig.direction} /></th>
+                                                        <th className="px-4 py-3 text-center cursor-pointer hover:bg-black/5" onClick={() => requestSort('inicial')}>Anterior <SortIcon active={sortConfig.key === 'inicial'} direction={sortConfig.direction} /></th>
+                                                        <th className="px-4 py-3 text-center text-green-600 cursor-pointer hover:bg-black/5" onClick={() => requestSort('entrada')}>(+) Ent. <SortIcon active={sortConfig.key === 'entrada'} direction={sortConfig.direction} /></th>
+                                                        <th className="px-4 py-3 text-center text-red-400 cursor-pointer hover:bg-black/5" onClick={() => requestSort('vendas')}>(-) Sai. <SortIcon active={sortConfig.key === 'vendas'} direction={sortConfig.direction} /></th>
+                                                        <th className="px-4 py-3 text-center text-blue-500 cursor-pointer hover:bg-black/5" onClick={() => requestSort('teorico')}>(=) Teórico <SortIcon active={sortConfig.key === 'teorico'} direction={sortConfig.direction} /></th>
+                                                        <th className="px-4 py-3 text-center bg-slate-100 dark:bg-slate-700/50 cursor-pointer hover:bg-black/5" onClick={() => requestSort('final')}>Atual <SortIcon active={sortConfig.key === 'final'} direction={sortConfig.direction} /></th>
+                                                        <th className="px-4 py-3 text-center cursor-pointer hover:bg-black/5" onClick={() => requestSort('diferenca')}>Dif. <SortIcon active={sortConfig.key === 'diferenca'} direction={sortConfig.direction} /></th>
+                                                        <th className="px-4 py-3 text-right cursor-pointer hover:bg-black/5" onClick={() => requestSort('perdaFinanceira')}>Perda R$ <SortIcon active={sortConfig.key === 'perdaFinanceira'} direction={sortConfig.direction} /></th>
+                                                        <th className="px-4 py-3 text-center cursor-pointer hover:bg-black/5" onClick={() => requestSort('status')}>Status <SortIcon active={sortConfig.key === 'status'} direction={sortConfig.direction} /></th>
                                                     </tr>
                                                 </thead>
                                                 <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
