@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-PT">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -37,6 +37,9 @@
             .print-area { position: absolute; left: 0; top: 0; width: 100%; color: black !important; background: white !important; }
             .no-print { display: none !important; }
         }
+        
+        .sort-icon { transition: transform 0.2s; }
+        .sort-asc { transform: rotate(180deg); }
     </style>
 </head>
 <body>
@@ -80,7 +83,7 @@
             Info: (p) => <IconBase {...p}><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></IconBase>,
             CheckCircle: (p) => <IconBase {...p}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></IconBase>,
             TrendingUp: (p) => <IconBase {...p}><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></IconBase>,
-            PackageX: (p) => <IconBase {...p}><path d="M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l2-1.14"/><path d="m7.5 4.27 9 5.15"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" x2="12" y1="22" y2="12"/><path d="m17 13 5 5m-5 0 5-5"/></IconBase>,
+            PackageX: (p) => <IconBase {...p}><path d="M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1.73l7 4a2 2 0 0 0 2 0l2-1.14"/><path d="m7.5 4.27 9 5.15"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" x2="12" y1="22" y2="12"/><path d="m17 13 5 5m-5 0 5-5"/></IconBase>,
             Truck: (p) => <IconBase {...p}><path d="M14 18V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></IconBase>,
             ArrowUp: (p) => <IconBase {...p}><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></IconBase>,
             ArrowDown: (p) => <IconBase {...p}><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></IconBase>,
@@ -90,7 +93,7 @@
         };
 
         // --- UTILITÁRIOS ---
-        const formatCurrency = (val) => new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' }).format(val);
+        const formatCurrency = (val) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
         const formatDate = (dateStr) => {
             if (!dateStr) return "-";
             const [year, month, day] = dateStr.split('-');
@@ -826,15 +829,15 @@
                                             <table className="w-full text-sm text-left">
                                                 <thead className={`font-semibold border-b whitespace-nowrap ${isDark ? 'bg-slate-900 text-slate-400 border-slate-700' : 'bg-slate-50 text-slate-500 border-slate-200'}`}>
                                                     <tr>
-                                                        <th className="px-4 py-3 cursor-pointer hover:bg-black/5" onClick={() => requestSort('nome')}>Produto <SortIcon active={sortConfig.key === 'nome'} direction={sortConfig.direction} /></th>
-                                                        <th className="px-4 py-3 text-center cursor-pointer hover:bg-black/5" onClick={() => requestSort('inicial')}>Anterior <SortIcon active={sortConfig.key === 'inicial'} direction={sortConfig.direction} /></th>
-                                                        <th className="px-4 py-3 text-center text-green-600 cursor-pointer hover:bg-black/5" onClick={() => requestSort('entrada')}>(+) Ent. <SortIcon active={sortConfig.key === 'entrada'} direction={sortConfig.direction} /></th>
-                                                        <th className="px-4 py-3 text-center text-red-400 cursor-pointer hover:bg-black/5" onClick={() => requestSort('vendas')}>(-) Sai. <SortIcon active={sortConfig.key === 'vendas'} direction={sortConfig.direction} /></th>
-                                                        <th className="px-4 py-3 text-center text-blue-500 cursor-pointer hover:bg-black/5" onClick={() => requestSort('teorico')}>(=) Teórico <SortIcon active={sortConfig.key === 'teorico'} direction={sortConfig.direction} /></th>
-                                                        <th className="px-4 py-3 text-center bg-slate-100 dark:bg-slate-700/50 cursor-pointer hover:bg-black/5" onClick={() => requestSort('final')}>Atual <SortIcon active={sortConfig.key === 'final'} direction={sortConfig.direction} /></th>
-                                                        <th className="px-4 py-3 text-center cursor-pointer hover:bg-black/5" onClick={() => requestSort('diferenca')}>Dif. <SortIcon active={sortConfig.key === 'diferenca'} direction={sortConfig.direction} /></th>
-                                                        <th className="px-4 py-3 text-right cursor-pointer hover:bg-black/5" onClick={() => requestSort('perdaFinanceira')}>Perda R$ <SortIcon active={sortConfig.key === 'perdaFinanceira'} direction={sortConfig.direction} /></th>
-                                                        <th className="px-4 py-3 text-center cursor-pointer hover:bg-black/5" onClick={() => requestSort('status')}>Status <SortIcon active={sortConfig.key === 'status'} direction={sortConfig.direction} /></th>
+                                                        <th className="px-4 py-3 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5" onClick={() => requestSort('nome')}>Produto <SortIcon active={sortConfig.key === 'nome'} direction={sortConfig.direction} /></th>
+                                                        <th className="px-4 py-3 text-center cursor-pointer hover:bg-black/5 dark:hover:bg-white/5" onClick={() => requestSort('inicial')}>Anterior <SortIcon active={sortConfig.key === 'inicial'} direction={sortConfig.direction} /></th>
+                                                        <th className="px-4 py-3 text-center text-green-600 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5" onClick={() => requestSort('entrada')}>(+) Ent. <SortIcon active={sortConfig.key === 'entrada'} direction={sortConfig.direction} /></th>
+                                                        <th className="px-4 py-3 text-center text-red-400 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5" onClick={() => requestSort('vendas')}>(-) Sai. <SortIcon active={sortConfig.key === 'vendas'} direction={sortConfig.direction} /></th>
+                                                        <th className="px-4 py-3 text-center text-blue-500 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5" onClick={() => requestSort('teorico')}>(=) Teórico <SortIcon active={sortConfig.key === 'teorico'} direction={sortConfig.direction} /></th>
+                                                        <th className={`px-4 py-3 text-center cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 ${isDark ? 'bg-slate-700 text-white' : 'bg-slate-100 text-slate-800'}`} onClick={() => requestSort('final')}>Atual <SortIcon active={sortConfig.key === 'final'} direction={sortConfig.direction} /></th>
+                                                        <th className="px-4 py-3 text-center cursor-pointer hover:bg-black/5 dark:hover:bg-white/5" onClick={() => requestSort('diferenca')}>Dif. <SortIcon active={sortConfig.key === 'diferenca'} direction={sortConfig.direction} /></th>
+                                                        <th className="px-4 py-3 text-right cursor-pointer hover:bg-black/5 dark:hover:bg-white/5" onClick={() => requestSort('perdaFinanceira')}>Perda R$ <SortIcon active={sortConfig.key === 'perdaFinanceira'} direction={sortConfig.direction} /></th>
+                                                        <th className="px-4 py-3 text-center cursor-pointer hover:bg-black/5 dark:hover:bg-white/5" onClick={() => requestSort('status')}>Status <SortIcon active={sortConfig.key === 'status'} direction={sortConfig.direction} /></th>
                                                     </tr>
                                                 </thead>
                                                 <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
@@ -845,7 +848,7 @@
                                                             <td className="px-4 py-3 text-center text-green-600">{item.entrada || '-'}</td>
                                                             <td className="px-4 py-3 text-center text-red-400">{item.vendas}</td>
                                                             <td className="px-4 py-3 text-center font-bold text-blue-500">{item.teorico}</td>
-                                                            <td className="px-4 py-3 text-center font-bold bg-slate-50 dark:bg-slate-800">{item.final}</td>
+                                                            <td className={`px-4 py-3 text-center font-bold ${isDark ? 'bg-slate-800 text-white' : 'bg-slate-50 text-slate-900'}`}>{item.final}</td>
                                                             <td className={`px-4 py-3 text-center font-bold ${item.diferenca < 0 ? 'text-red-500' : 'text-green-500'}`}>{item.diferenca}</td>
                                                             <td className="px-4 py-3 text-right font-medium text-red-500">{item.perdaFinanceira < 0 ? formatCurrency(item.perdaAbsoluta) : '-'}</td>
                                                             <td className="px-4 py-3 text-center"><StatusBadge type={item.status} text={item.status} /></td>
@@ -856,12 +859,12 @@
                                                     <tfoot className={`font-bold ${isDark ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-800'}`}>
                                                         <tr>
                                                             <td className="px-4 py-3 text-right">TOTAIS:</td>
-                                                            <td className="px-4 py-3 text-center">{totaisTabela.inicial}</td>
-                                                            <td className="px-4 py-3 text-center text-green-600">{totaisTabela.entrada}</td>
-                                                            <td className="px-4 py-3 text-center text-red-400">{totaisTabela.vendas}</td>
-                                                            <td className="px-4 py-3 text-center text-blue-500">{totaisTabela.teorico}</td>
-                                                            <td className="px-4 py-3 text-center">{totaisTabela.final}</td>
-                                                            <td className={`px-4 py-3 text-center ${totaisTabela.diferenca < 0 ? 'text-red-500' : 'text-green-500'}`}>{totaisTabela.diferenca}</td>
+                                                            <td className="px-4 py-3 text-center">{totaisTabela.inicial.toFixed(1)}</td>
+                                                            <td className="px-4 py-3 text-center text-green-600">{totaisTabela.entrada.toFixed(1)}</td>
+                                                            <td className="px-4 py-3 text-center text-red-400">{totaisTabela.vendas.toFixed(1)}</td>
+                                                            <td className="px-4 py-3 text-center text-blue-500">{totaisTabela.teorico.toFixed(1)}</td>
+                                                            <td className={`px-4 py-3 text-center ${isDark ? 'bg-slate-800' : 'bg-slate-50'}`}>{totaisTabela.final.toFixed(1)}</td>
+                                                            <td className={`px-4 py-3 text-center ${totaisTabela.diferenca < 0 ? 'text-red-500' : 'text-green-500'}`}>{totaisTabela.diferenca.toFixed(1)}</td>
                                                             <td className="px-4 py-3 text-right text-red-500">{formatCurrency(Math.abs(totaisTabela.perdaFinanceira))}</td>
                                                             <td></td>
                                                         </tr>
