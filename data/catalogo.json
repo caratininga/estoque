@@ -1,0 +1,584 @@
+{
+  "2023-12-13": {
+    "1": {
+      "nome": "AGUA SEM GAS 500ML",
+      "categoria": "AGUAS",
+      "filiais": {
+        "GRACA": { "custo": 1.17, "preco_venda": 3.00 },
+        "MUCAMBO": { "custo": 1.98, "preco_venda": 2.99 },
+        "FRECHEIRINHA": { "custo": 1.60, "preco_venda": 3.00 },
+        "TIANGUA": { "custo": 1.31, "preco_venda": 3.00 }
+      }
+    },
+    "2": {
+      "nome": "AGUA SEM GAS 1,5L",
+      "categoria": "AGUAS",
+      "filiais": {
+        "GRACA": { "custo": 2.49, "preco_venda": 7.00 },
+        "MUCAMBO": { "custo": 2.49, "preco_venda": 6.99 },
+        "FRECHEIRINHA": { "custo": 2.60, "preco_venda": 7.00 },
+        "TIANGUA": { "custo": 2.75, "preco_venda": 7.00 }
+      }
+    },
+    "3": {
+      "nome": "AGUA COM GAS 500ML",
+      "categoria": "AGUAS",
+      "filiais": {
+        "GRACA": { "custo": 1.83, "preco_venda": 4.00 },
+        "MUCAMBO": { "custo": 1.83, "preco_venda": 3.99 },
+        "FRECHEIRINHA": { "custo": 1.70, "preco_venda": 4.00 },
+        "TIANGUA": { "custo": 1.92, "preco_venda": 4.00 }
+      }
+    },
+    "4": {
+      "nome": "AGUA DE COCO",
+      "categoria": "AGUAS",
+      "filiais": {
+        "GRACA": { "custo": 1.54, "preco_venda": 5.00 },
+        "MUCAMBO": { "custo": 0.00, "preco_venda": 4.99 },
+        "FRECHEIRINHA": { "custo": 0.00, "preco_venda": 4.50 },
+        "TIANGUA": { "custo": 0.00, "preco_venda": 5.00 }
+      }
+    },
+    "5": {
+      "nome": "AGUA TONICA ANTARCTICA 350ML",
+      "categoria": "AGUAS",
+      "filiais": {
+        "GRACA": { "custo": 3.36, "preco_venda": 6.00 },
+        "MUCAMBO": { "custo": 3.50, "preco_venda": 5.99 },
+        "FRECHEIRINHA": { "custo": 3.33, "preco_venda": 5.50 },
+        "TIANGUA": { "custo": 0.00, "preco_venda": 6.00 }
+      }
+    },
+    "6": {
+      "nome": "AGUA TONICA SCHWEPPES 350ML",
+      "categoria": "AGUAS",
+      "filiais": {
+        "GRACA": { "custo": 2.87, "preco_venda": 6.00 },
+        "MUCAMBO": { "custo": 2.96, "preco_venda": 5.99 },
+        "FRECHEIRINHA": { "custo": 2.97, "preco_venda": 5.50 },
+        "TIANGUA": { "custo": 2.97, "preco_venda": 6.00 }
+      }
+    },
+    "20": {
+      "nome": "CAJUINA SAO GERALDO 2L",
+      "categoria": "REFRIGERANTES",
+      "filiais": {
+        "GRACA": { "custo": 0.00, "preco_venda": 17.00 },
+        "MUCAMBO": { "custo": 0.00, "preco_venda": 15.99 },
+        "FRECHEIRINHA": { "custo": 9.00, "preco_venda": 15.99 },
+        "TIANGUA": { "custo": 0.00, "preco_venda": 15.99 }
+      }
+    },
+    "21": {
+      "nome": "CAJUINA SAO GERALDO 1L",
+      "categoria": "REFRIGERANTES",
+      "filiais": {
+        "GRACA": { "custo": 6.33, "preco_venda": 9.99 },
+        "MUCAMBO": { "custo": 6.67, "preco_venda": 9.99 },
+        "FRECHEIRINHA": { "custo": 6.50, "preco_venda": 9.99 },
+        "TIANGUA": { "custo": 6.50, "preco_venda": 9.99 }
+      }
+    },
+    "22": {
+      "nome": "CAJUINA SAO GERALDO 600ML",
+      "categoria": "REFRIGERANTES",
+      "filiais": {
+        "GRACA": { "custo": 9.17, "preco_venda": 6.99 },
+        "MUCAMBO": { "custo": 9.17, "preco_venda": 6.99 },
+        "FRECHEIRINHA": { "custo": 4.58, "preco_venda": 6.99 },
+        "TIANGUA": { "custo": 6.88, "preco_venda": 6.99 }
+      }
+    },
+    "23": {
+      "nome": "COCA-COLA 2L",
+      "categoria": "REFRIGERANTES",
+      "filiais": {
+        "GRACA": { "custo": 9.56, "preco_venda": 15.99 },
+        "MUCAMBO": { "custo": 10.28, "preco_venda": 15.99 },
+        "FRECHEIRINHA": { "custo": 9.63, "preco_venda": 15.99 },
+        "TIANGUA": { "custo": 0.00, "preco_venda": 15.99 }
+      }
+    },
+    "24": {
+      "nome": "COCA-COLA LS 1L",
+      "categoria": "REFRIGERANTES",
+      "filiais": {
+        "GRACA": { "custo": 4.70, "preco_venda": 9.99 },
+        "MUCAMBO": { "custo": 4.66, "preco_venda": 9.99 },
+        "FRECHEIRINHA": { "custo": 4.73, "preco_venda": 9.99 },
+        "TIANGUA": { "custo": 4.66, "preco_venda": 9.99 }
+      }
+    },
+    "25": {
+      "nome": "COCA-COLA 600ML",
+      "categoria": "REFRIGERANTES",
+      "filiais": {
+        "GRACA": { "custo": 3.69, "preco_venda": 6.99 },
+        "MUCAMBO": { "custo": 4.57, "preco_venda": 6.99 },
+        "FRECHEIRINHA": { "custo": 3.71, "preco_venda": 6.99 },
+        "TIANGUA": { "custo": 0.00, "preco_venda": 6.99 }
+      }
+    },
+    "26": {
+      "nome": "COCA-COLA LATA 350ML",
+      "categoria": "REFRIGERANTES",
+      "filiais": {
+        "GRACA": { "custo": 3.06, "preco_venda": 6.00 },
+        "MUCAMBO": { "custo": 3.06, "preco_venda": 6.00 },
+        "FRECHEIRINHA": { "custo": 3.08, "preco_venda": 5.50 },
+        "TIANGUA": { "custo": 2.79, "preco_venda": 6.00 }
+      }
+    },
+    "27": {
+      "nome": "COCA-COLA ZERO LATA 350ML",
+      "categoria": "REFRIGERANTES",
+      "filiais": {
+        "GRACA": { "custo": 2.95, "preco_venda": 6.00 },
+        "MUCAMBO": { "custo": 2.58, "preco_venda": 6.00 },
+        "FRECHEIRINHA": { "custo": 2.97, "preco_venda": 5.50 },
+        "TIANGUA": { "custo": 2.58, "preco_venda": 6.00 }
+      }
+    },
+    "28": {
+      "nome": "COCA-COLA KS 290ML",
+      "categoria": "REFRIGERANTES",
+      "filiais": {
+        "GRACA": { "custo": 2.34, "preco_venda": 4.99 },
+        "MUCAMBO": { "custo": 3.21, "preco_venda": 5.00 },
+        "FRECHEIRINHA": { "custo": 2.15, "preco_venda": 5.00 },
+        "TIANGUA": { "custo": 2.98, "preco_venda": 5.00 }
+      }
+    },
+    "29": {
+      "nome": "DELRIO GUARANA 2L",
+      "categoria": "REFRIGERANTES",
+      "filiais": {
+        "GRACA": { "custo": 5.88, "preco_venda": 10.00 },
+        "MUCAMBO": { "custo": 5.88, "preco_venda": 10.00 },
+        "FRECHEIRINHA": { "custo": 0.00, "preco_venda": 10.00 },
+        "TIANGUA": { "custo": 0.00, "preco_venda": 10.00 }
+      }
+    },
+    "30": {
+      "nome": "DELRIO GUARANA 1L",
+      "categoria": "REFRIGERANTES",
+      "filiais": {
+        "GRACA": { "custo": 3.64, "preco_venda": 7.00 },
+        "MUCAMBO": { "custo": 3.64, "preco_venda": 7.00 },
+        "FRECHEIRINHA": { "custo": 0.00, "preco_venda": 7.00 },
+        "TIANGUA": { "custo": 3.55, "preco_venda": 8.00 }
+      }
+    },
+    "31": {
+      "nome": "DELRIO LARANJA 2L",
+      "categoria": "REFRIGERANTES",
+      "filiais": {
+        "GRACA": { "custo": 5.27, "preco_venda": 10.00 },
+        "MUCAMBO": { "custo": 0.00, "preco_venda": 10.00 },
+        "FRECHEIRINHA": { "custo": 0.00, "preco_venda": 10.00 },
+        "TIANGUA": { "custo": 0.00, "preco_venda": 10.00 }
+      }
+    },
+    "32": {
+      "nome": "GUARANA ANTARCTICA 2L",
+      "categoria": "REFRIGERANTES",
+      "filiais": {
+        "GRACA": { "custo": 8.13, "preco_venda": 15.99 },
+        "MUCAMBO": { "custo": 8.13, "preco_venda": 15.99 },
+        "FRECHEIRINHA": { "custo": 7.53, "preco_venda": 15.99 },
+        "TIANGUA": { "custo": 7.64, "preco_venda": 15.99 }
+      }
+    },
+    "33": {
+      "nome": "GUARANA ANTARCTICA 1L",
+      "categoria": "REFRIGERANTES",
+      "filiais": {
+        "GRACA": { "custo": 4.66, "preco_venda": 9.99 },
+        "MUCAMBO": { "custo": 4.66, "preco_venda": 9.99 },
+        "FRECHEIRINHA": { "custo": 4.55, "preco_venda": 9.99 },
+        "TIANGUA": { "custo": 4.55, "preco_venda": 9.99 }
+      }
+    },
+    "34": {
+      "nome": "GUARANA ANTARCTICA LATA 350ML",
+      "categoria": "REFRIGERANTES",
+      "filiais": {
+        "GRACA": { "custo": 2.66, "preco_venda": 6.00 },
+        "MUCAMBO": { "custo": 2.34, "preco_venda": 6.00 },
+        "FRECHEIRINHA": { "custo": 2.75, "preco_venda": 5.50 },
+        "TIANGUA": { "custo": 2.75, "preco_venda": 6.00 }
+      }
+    },
+    "35": {
+      "nome": "GUARANA KUAT LATA 350ML",
+      "categoria": "REFRIGERANTES",
+      "filiais": {
+        "GRACA": { "custo": 2.53, "preco_venda": 6.00 },
+        "MUCAMBO": { "custo": 2.53, "preco_venda": 6.00 },
+        "FRECHEIRINHA": { "custo": 2.55, "preco_venda": 5.50 },
+        "TIANGUA": { "custo": 0.00, "preco_venda": 6.00 }
+      }
+    },
+    "36": {
+      "nome": "FANTA LARANJA LATA 350ML",
+      "categoria": "REFRIGERANTES",
+      "filiais": {
+        "GRACA": { "custo": 2.65, "preco_venda": 6.00 },
+        "MUCAMBO": { "custo": 2.65, "preco_venda": 6.00 },
+        "FRECHEIRINHA": { "custo": 2.67, "preco_venda": 5.50 },
+        "TIANGUA": { "custo": 2.40, "preco_venda": 6.00 }
+      }
+    },
+    "37": {
+      "nome": "FANTA UVA LATA 350ML",
+      "categoria": "REFRIGERANTES",
+      "filiais": {
+        "GRACA": { "custo": 2.65, "preco_venda": 6.00 },
+        "MUCAMBO": { "custo": 2.65, "preco_venda": 6.00 },
+        "FRECHEIRINHA": { "custo": 2.67, "preco_venda": 5.50 },
+        "TIANGUA": { "custo": 2.40, "preco_venda": 6.00 }
+      }
+    },
+    "38": {
+      "nome": "PEPSI ZERO LATA 350ML",
+      "categoria": "REFRIGERANTES",
+      "filiais": {
+        "GRACA": { "custo": 0.00, "preco_venda": 6.00 },
+        "MUCAMBO": { "custo": 0.00, "preco_venda": 6.00 },
+        "FRECHEIRINHA": { "custo": 0.00, "preco_venda": 6.00 },
+        "TIANGUA": { "custo": 0.00, "preco_venda": 6.00 }
+      }
+    },
+    "39": {
+      "nome": "SCHWEPPES CITRUS LATA 350ML",
+      "categoria": "REFRIGERANTES",
+      "filiais": {
+        "GRACA": { "custo": 3.06, "preco_venda": 6.00 },
+        "MUCAMBO": { "custo": 3.06, "preco_venda": 6.00 },
+        "FRECHEIRINHA": { "custo": 3.08, "preco_venda": 5.50 },
+        "TIANGUA": { "custo": 2.79, "preco_venda": 6.00 }
+      }
+    },
+    "40": {
+      "nome": "SPRITE LATA 350ML",
+      "categoria": "REFRIGERANTES",
+      "filiais": {
+        "GRACA": { "custo": 2.65, "preco_venda": 6.00 },
+        "MUCAMBO": { "custo": 2.65, "preco_venda": 6.00 },
+        "FRECHEIRINHA": { "custo": 2.67, "preco_venda": 5.50 },
+        "TIANGUA": { "custo": 2.63, "preco_venda": 6.00 }
+      }
+    },
+    "41": {
+      "nome": "SUKITA 2L",
+      "categoria": "REFRIGERANTES",
+      "filiais": {
+        "GRACA": { "custo": 5.41, "preco_venda": 10.00 },
+        "MUCAMBO": { "custo": 0.00, "preco_venda": 10.00 },
+        "FRECHEIRINHA": { "custo": 0.00, "preco_venda": 10.00 },
+        "TIANGUA": { "custo": 0.00, "preco_venda": 10.00 }
+      }
+    },
+    "44": {
+      "nome": "ENERG MONSTER LATA 269ML",
+      "categoria": "ENERGETICOS",
+      "filiais": {
+        "GRACA": { "custo": 7.47, "preco_venda": 8.99 },
+        "MUCAMBO": { "custo": 0.00, "preco_venda": 8.99 },
+        "FRECHEIRINHA": { "custo": 5.80, "preco_venda": 8.99 },
+        "TIANGUA": { "custo": 5.64, "preco_venda": 9.99 }
+      }
+    },
+    "46": {
+      "nome": "AMSTEL 600ML",
+      "categoria": "CERVEJAS",
+      "filiais": {
+        "GRACA": { "custo": 0.00, "preco_venda": 10.00 },
+        "MUCAMBO": { "custo": 0.00, "preco_venda": 9.99 },
+        "FRECHEIRINHA": { "custo": 0.00, "preco_venda": 10.00 },
+        "TIANGUA": { "custo": 0.00, "preco_venda": 9.99 }
+      }
+    },
+    "47": {
+      "nome": "ANTARCTICA ORIGINAL 600ML",
+      "categoria": "CERVEJAS",
+      "filiais": {
+        "GRACA": { "custo": 7.76, "preco_venda": 13.00 },
+        "MUCAMBO": { "custo": 7.42, "preco_venda": 12.99 },
+        "FRECHEIRINHA": { "custo": 7.25, "preco_venda": 13.99 },
+        "TIANGUA": { "custo": 7.58, "preco_venda": 13.99 }
+      }
+    },
+    "48": {
+      "nome": "BRAHMA CHOPP 600ML",
+      "categoria": "CERVEJAS",
+      "filiais": {
+        "GRACA": { "custo": 6.22, "preco_venda": 9.50 },
+        "MUCAMBO": { "custo": 6.22, "preco_venda": 9.99 },
+        "FRECHEIRINHA": { "custo": 6.08, "preco_venda": 10.99 },
+        "TIANGUA": { "custo": 0.00, "preco_venda": 10.99 }
+      }
+    },
+    "49": {
+      "nome": "BRAHMA DUPLO MALTE 600ML",
+      "categoria": "CERVEJAS",
+      "filiais": {
+        "GRACA": { "custo": 6.82, "preco_venda": 10.00 },
+        "MUCAMBO": { "custo": 6.48, "preco_venda": 9.99 },
+        "FRECHEIRINHA": { "custo": 6.33, "preco_venda": 10.99 },
+        "TIANGUA": { "custo": 6.66, "preco_venda": 10.99 }
+      }
+    },
+    "50": {
+      "nome": "BOHEMIA 600ML",
+      "categoria": "CERVEJAS",
+      "filiais": {
+        "GRACA": { "custo": 6.65, "preco_venda": 10.00 },
+        "MUCAMBO": { "custo": 6.00, "preco_venda": 10.99 },
+        "FRECHEIRINHA": { "custo": 6.16, "preco_venda": 11.00 },
+        "TIANGUA": { "custo": 6.50, "preco_venda": 10.99 }
+      }
+    },
+    "51": {
+      "nome": "BUDWEISER 600ML",
+      "categoria": "CERVEJAS",
+      "filiais": {
+        "GRACA": { "custo": 7.12, "preco_venda": 10.00 },
+        "MUCAMBO": { "custo": 7.12, "preco_venda": 11.99 },
+        "FRECHEIRINHA": { "custo": 6.62, "preco_venda": 12.99 },
+        "TIANGUA": { "custo": 6.62, "preco_venda": 12.99 }
+      }
+    },
+    "53": {
+      "nome": "HEINEKEN 600ML",
+      "categoria": "CERVEJAS",
+      "filiais": {
+        "GRACA": { "custo": 9.38, "preco_venda": 16.00 },
+        "MUCAMBO": { "custo": 9.38, "preco_venda": 15.99 },
+        "FRECHEIRINHA": { "custo": 9.38, "preco_venda": 16.99 },
+        "TIANGUA": { "custo": 9.58, "preco_venda": 16.99 }
+      }
+    },
+    "54": {
+      "nome": "HEINEKEN LN 330ML",
+      "categoria": "CERVEJAS",
+      "filiais": {
+        "GRACA": { "custo": 5.83, "preco_venda": 10.00 },
+        "MUCAMBO": { "custo": 5.83, "preco_venda": 9.99 },
+        "FRECHEIRINHA": { "custo": 5.83, "preco_venda": 10.99 },
+        "TIANGUA": { "custo": 5.69, "preco_venda": 10.99 }
+      }
+    },
+    "55": {
+      "nome": "HEINEKEN LN ZERO 330ML",
+      "categoria": "CERVEJAS ZERO ALCOOL",
+      "filiais": {
+        "GRACA": { "custo": 6.25, "preco_venda": 10.00 },
+        "MUCAMBO": { "custo": 0.00, "preco_venda": 10.00 },
+        "FRECHEIRINHA": { "custo": 5.85, "preco_venda": 10.00 },
+        "TIANGUA": { "custo": 0.00, "preco_venda": 10.00 }
+      }
+    },
+    "58": {
+      "nome": "SKOL 600ML",
+      "categoria": "CERVEJAS",
+      "filiais": {
+        "GRACA": { "custo": 6.56, "preco_venda": 10.00 },
+        "MUCAMBO": { "custo": 6.56, "preco_venda": 9.99 },
+        "FRECHEIRINHA": { "custo": 6.08, "preco_venda": 10.99 },
+        "TIANGUA": { "custo": 6.08, "preco_venda": 10.99 }
+      }
+    },
+    "59": {
+      "nome": "SPATEN 600ML",
+      "categoria": "CERVEJAS",
+      "filiais": {
+        "GRACA": { "custo": 7.76, "preco_venda": 13.00 },
+        "MUCAMBO": { "custo": 7.42, "preco_venda": 12.99 },
+        "FRECHEIRINHA": { "custo": 7.25, "preco_venda": 13.99 },
+        "TIANGUA": { "custo": 7.76, "preco_venda": 13.99 }
+      }
+    },
+    "165": {
+      "nome": "STELLA ARTOIS 600ML",
+      "categoria": "CERVEJAS",
+      "filiais": {
+        "GRACA": { "custo": 8.44, "preco_venda": 14.00 },
+        "MUCAMBO": { "custo": 8.44, "preco_venda": 13.00 },
+        "FRECHEIRINHA": { "custo": 7.91, "preco_venda": 13.99 },
+        "TIANGUA": { "custo": 8.25, "preco_venda": 13.99 }
+      }
+    },
+    "761": {
+      "nome": "ENERG MONSTER LATA 473ML",
+      "categoria": "ENERGETICOS",
+      "filiais": {
+        "GRACA": { "custo": 9.09, "preco_venda": 12.99 },
+        "MUCAMBO": { "custo": 9.09, "preco_venda": 12.99 },
+        "FRECHEIRINHA": { "custo": 9.15, "preco_venda": 12.99 },
+        "TIANGUA": { "custo": 17.83, "preco_venda": 14.50 }
+      }
+    },
+    "763": {
+      "nome": "COCA-COLA ZERO 2L",
+      "categoria": "REFRIGERANTES",
+      "filiais": {
+        "GRACA": { "custo": 9.15, "preco_venda": 15.99 },
+        "MUCAMBO": { "custo": 10.08, "preco_venda": 15.99 },
+        "FRECHEIRINHA": { "custo": 0.00, "preco_venda": 15.99 },
+        "TIANGUA": { "custo": 0.00, "preco_venda": 15.99 }
+      }
+    },
+    "764": {
+      "nome": "COCA-COLA ZERO 600ML",
+      "categoria": "REFRIGERANTES",
+      "filiais": {
+        "GRACA": { "custo": 3.69, "preco_venda": 7.00 },
+        "MUCAMBO": { "custo": 4.36, "preco_venda": 6.99 },
+        "FRECHEIRINHA": { "custo": 3.71, "preco_venda": 6.99 },
+        "TIANGUA": { "custo": 0.00, "preco_venda": 6.99 }
+      }
+    },
+    "767": {
+      "nome": "GUARANA ANTARCTICA 600ML",
+      "categoria": "REFRIGERANTES",
+      "filiais": {
+        "GRACA": { "custo": 0.00, "preco_venda": 6.99 },
+        "MUCAMBO": { "custo": 0.00, "preco_venda": 6.99 },
+        "FRECHEIRINHA": { "custo": 0.00, "preco_venda": 6.99 },
+        "TIANGUA": { "custo": 0.00, "preco_venda": 6.99 }
+      }
+    },
+    "768": {
+      "nome": "ENERG RED BULL LATA 250ML",
+      "categoria": "ENERGETICOS",
+      "filiais": {
+        "GRACA": { "custo": 7.87, "preco_venda": 12.99 },
+        "MUCAMBO": { "custo": 8.24, "preco_venda": 12.99 },
+        "FRECHEIRINHA": { "custo": 28.76, "preco_venda": 12.99 },
+        "TIANGUA": { "custo": 8.06, "preco_venda": 12.99 }
+      }
+    },
+    "816": {
+      "nome": "BUDWEISER LN 330ML",
+      "categoria": "CERVEJAS",
+      "filiais": {
+        "GRACA": { "custo": 118.83, "preco_venda": 7.00 },
+        "MUCAMBO": { "custo": 4.92, "preco_venda": 7.00 },
+        "FRECHEIRINHA": { "custo": 4.79, "preco_venda": 8.00 },
+        "TIANGUA": { "custo": 5.09, "preco_venda": 9.00 }
+      }
+    },
+    "826": {
+      "nome": "COCA-COLA 1L",
+      "categoria": "REFRIGERANTES",
+      "filiais": {
+        "GRACA": { "custo": 6.57, "preco_venda": 9.99 },
+        "MUCAMBO": { "custo": 10.00, "preco_venda": 9.99 },
+        "FRECHEIRINHA": { "custo": 6.61, "preco_venda": 9.99 },
+        "TIANGUA": { "custo": 6.28, "preco_venda": 9.99 }
+      }
+    },
+    "827": {
+      "nome": "COCA-COLA ZERO 1L",
+      "categoria": "REFRIGERANTES",
+      "filiais": {
+        "GRACA": { "custo": 6.46, "preco_venda": 9.99 },
+        "MUCAMBO": { "custo": 0.00, "preco_venda": 9.99 },
+        "FRECHEIRINHA": { "custo": 6.51, "preco_venda": 9.99 },
+        "TIANGUA": { "custo": 6.13, "preco_venda": 9.99 }
+      }
+    },
+    "833": {
+      "nome": "GUARANA ANTARCTICA ZERO 1L",
+      "categoria": "REFRIGERANTES",
+      "filiais": {
+        "GRACA": { "custo": 4.24, "preco_venda": 9.99 },
+        "MUCAMBO": { "custo": 4.66, "preco_venda": 9.99 },
+        "FRECHEIRINHA": { "custo": 0.00, "preco_venda": 9.99 },
+        "TIANGUA": { "custo": 0.00, "preco_venda": 9.99 }
+      }
+    },
+    "840": {
+      "nome": "SPRITE FRESH",
+      "categoria": "REFRIGERANTES",
+      "filiais": {
+        "GRACA": { "custo": 4.06, "preco_venda": 7.00 },
+        "MUCAMBO": { "custo": 3.92, "preco_venda": 7.00 },
+        "FRECHEIRINHA": { "custo": 3.84, "preco_venda": 7.00 },
+        "TIANGUA": { "custo": 0.00, "preco_venda": 7.00 }
+      }
+    },
+    "842": {
+      "nome": "GUARANA ANTARCTICA ZERO 350 ML",
+      "categoria": "REFRIGERANTES",
+      "filiais": {
+        "GRACA": { "custo": 2.56, "preco_venda": 6.00 },
+        "MUCAMBO": { "custo": 2.81, "preco_venda": 6.00 },
+        "FRECHEIRINHA": { "custo": 2.75, "preco_venda": 5.50 },
+        "TIANGUA": { "custo": 2.75, "preco_venda": 6.00 }
+      }
+    },
+    "855": {
+      "nome": "CORONA LN 330ML",
+      "categoria": "CERVEJAS",
+      "filiais": {
+        "GRACA": { "custo": 6.76, "preco_venda": 10.00 },
+        "MUCAMBO": { "custo": 6.76, "preco_venda": 10.00 },
+        "FRECHEIRINHA": { "custo": 6.61, "preco_venda": 10.00 },
+        "TIANGUA": { "custo": 6.61, "preco_venda": 10.00 }
+      }
+    },
+    "898": {
+      "nome": "STELLA ARTOIS LN 330ML",
+      "categoria": "CERVEJAS",
+      "filiais": {
+        "GRACA": { "custo": 6.00, "preco_venda": 9.00 },
+        "MUCAMBO": { "custo": 6.00, "preco_venda": 9.00 },
+        "FRECHEIRINHA": { "custo": 5.86, "preco_venda": 9.00 },
+        "TIANGUA": { "custo": 5.70, "preco_venda": 9.00 }
+      }
+    },
+    "1022": {
+      "nome": "SKOL BEATS RED MIX LN 269ML",
+      "categoria": "CERVEJAS",
+      "filiais": {
+        "GRACA": { "custo": 6.00, "preco_venda": 10.00 },
+        "MUCAMBO": { "custo": 0.00, "preco_venda": 10.00 },
+        "FRECHEIRINHA": { "custo": 6.89, "preco_venda": 10.00 },
+        "TIANGUA": { "custo": 0.00, "preco_venda": 10.00 }
+      }
+    },
+    "1033": {
+      "nome": "SPATEN LN 355ML",
+      "categoria": "CERVEJAS",
+      "filiais": {
+        "GRACA": { "custo": 5.48, "preco_venda": 8.00 },
+        "MUCAMBO": { "custo": 10.00, "preco_venda": 8.00 },
+        "FRECHEIRINHA": { "custo": 5.36, "preco_venda": 8.00 },
+        "TIANGUA": { "custo": 5.09, "preco_venda": 8.00 }
+      }
+    },
+    "1034": {
+      "nome": "CORONA ZERO LN 330ML",
+      "categoria": "CERVEJAS",
+      "filiais": {
+        "GRACA": { "custo": 6.31, "preco_venda": 11.00 },
+        "MUCAMBO": { "custo": 6.50, "preco_venda": 11.00 },
+        "FRECHEIRINHA": { "custo": 0.00, "preco_venda": 11.00 },
+        "TIANGUA": { "custo": 0.00, "preco_venda": 11.00 }
+      }
+    },
+    "1041": {
+      "nome": "STELLA ARTOIS PURE G LN 330ML",
+      "categoria": "CERVEJAS",
+      "filiais": {
+        "GRACA": { "custo": 6.01, "preco_venda": 10.00 },
+        "MUCAMBO": { "custo": 6.01, "preco_venda": 10.00 },
+        "FRECHEIRINHA": { "custo": 5.87, "preco_venda": 10.00 },
+        "TIANGUA": { "custo": 0.00, "preco_venda": 10.00 }
+      }
+    }
+  }
+}
