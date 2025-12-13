@@ -30,14 +30,6 @@
         .dark ::-webkit-scrollbar-thumb { background: #475569; }
         .dark ::-webkit-scrollbar-thumb:hover { background: #64748b; }
         
-        /* Estilos de Impressão */
-        @media print {
-            body * { visibility: hidden; }
-            .print-area, .print-area * { visibility: visible; }
-            .print-area { position: absolute; left: 0; top: 0; width: 100%; color: black !important; background: white !important; }
-            .no-print { display: none !important; }
-        }
-        
         .sort-icon { transition: transform 0.2s; }
         .sort-asc { transform: rotate(180deg); }
     </style>
@@ -54,6 +46,7 @@
             BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
             PieChart, Pie, Cell, ComposedChart, Line, LabelList
         } = RechartsObj;
+        
         const chartsAvailable = !!(BarChart && PieChart && ComposedChart);
         const SafeChart = ({ children }) => chartsAvailable ? children : <div className="flex items-center justify-center h-full text-gray-400 text-sm">Gráfico indisponível</div>;
 
@@ -370,10 +363,16 @@
             const [showFichaModal, setShowFichaModal] = useState(false);
             const [fichaCategoria, setFichaCategoria] = useState('TODAS');
 
+            // --- THEME LOGIC FIX ---
             useEffect(() => {
-                const check = () => window.matchMedia('(prefers-color-scheme: dark)').matches;
-                setIsDark(theme === 'system' ? check() : theme === 'dark');
+                const isSystemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (theme === 'system') setIsDark(isSystemDark);
+                else setIsDark(theme === 'dark');
             }, [theme]);
+
+            const toggleTheme = () => {
+                setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+            };
 
             const { dadosBI, loading, error, catalogoFull } = useDadosReais(unidadeAtual, categoriaSelecionada);
 
@@ -462,7 +461,7 @@
                 return sortableItems;
             }, [dadosAtuais, sortConfig]);
 
-            // Gerador de Ficha
+            // Gerador de Ficha com Agrupamento
             const gerarFichaContagem = () => {
                 const win = window.open('', '_blank');
                 
@@ -470,10 +469,20 @@
                 const latestKey = Object.keys(catalogoFull).sort().reverse()[0];
                 const catalogo = catalogoFull[latestKey];
                 
-                const produtosFiltrados = Object.keys(catalogo)
+                // Agrupa produtos por categoria
+                const produtos = Object.keys(catalogo)
                     .map(key => catalogo[key])
-                    .filter(p => fichaCategoria === 'TODAS' || p.categoria === fichaCategoria)
-                    .sort((a, b) => a.nome.localeCompare(b.nome));
+                    .filter(p => fichaCategoria === 'TODAS' || p.categoria === fichaCategoria);
+                
+                // Cria um mapa: Categoria -> [Produtos]
+                const produtosPorCategoria = produtos.reduce((acc, produto) => {
+                    if (!acc[produto.categoria]) acc[produto.categoria] = [];
+                    acc[produto.categoria].push(produto);
+                    return acc;
+                }, {});
+                
+                // Ordena categorias
+                const categoriasOrdenadas = Object.keys(produtosPorCategoria).sort();
 
                 const html = `
                     <html>
@@ -481,43 +490,52 @@
                         <title>Ficha de Contagem - ${fichaCategoria}</title>
                         <style>
                             body { font-family: Arial, sans-serif; font-size: 12px; }
-                            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-                            th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-                            th { background-color: #f0f0f0; }
-                            .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #000; padding-bottom: 10px; }
+                            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+                            th, td { border: 1px solid #ccc; padding: 6px 8px; text-align: left; }
+                            th { background-color: #f0f0f0; text-transform: uppercase; font-size: 11px; }
+                            .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 10px; }
+                            .meta-info { display: flex; gap: 20px; font-size: 14px; }
+                            .category-header { background-color: #ddd; font-weight: bold; text-align: center; font-size: 13px; padding: 8px; text-transform: uppercase; }
+                            h1 { margin: 0; font-size: 20px; }
                             @media print { .no-print { display: none; } }
                         </style>
                     </head>
                     <body>
                         <div class="header">
                             <div>
-                                <h1>Ficha de Contagem de Estoque</h1>
-                                <p><strong>Categoria:</strong> ${fichaCategoria === 'TODAS' ? 'Geral' : fichaCategoria}</p>
-                                <p><strong>Data:</strong> ____/____/_______</p>
-                                <p><strong>Responsável:</strong> ________________________</p>
+                                <h1>Ficha de Contagem</h1>
+                                <div class="meta-info">
+                                    <span><strong>Filtro:</strong> ${fichaCategoria === 'TODAS' ? 'Geral' : fichaCategoria}</span>
+                                    <span><strong>Data:</strong> ____/____/_______</span>
+                                    <span><strong>Responsável:</strong> ________________________</span>
+                                </div>
                             </div>
-                            <button class="no-print" onclick="window.print()" style="padding: 10px 20px; font-size: 14px; cursor: pointer;">IMPRIMIR FICHA</button>
+                            <button class="no-print" onclick="window.print()" style="padding: 8px 16px; font-size: 14px; cursor: pointer; font-weight: bold;">IMPRIMIR</button>
                         </div>
+                        
                         <table>
                             <thead>
                                 <tr>
-                                    <th style="width: 35%">Produto</th>
-                                    <th style="width: 15%">Categoria</th>
+                                    <th style="width: 40%">Produto</th>
                                     <th>Local 1</th>
                                     <th>Local 2</th>
                                     <th>Local 3</th>
                                     <th>Local 4</th>
-                                    <th style="background-color: #e0e0e0">TOTAL</th>
+                                    <th style="background-color: #e0e0e0; font-weight: bold; width: 10%">TOTAL</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                ${produtosFiltrados.map(p => `
+                                ${categoriasOrdenadas.map(categoria => `
                                     <tr>
-                                        <td>${p.nome}</td>
-                                        <td>${p.categoria}</td>
-                                        <td></td><td></td><td></td><td></td>
-                                        <td style="background-color: #f9f9f9"></td>
+                                        <td colspan="6" class="category-header">${categoria}</td>
                                     </tr>
+                                    ${produtosPorCategoria[categoria].sort((a,b) => a.nome.localeCompare(b.nome)).map(p => `
+                                        <tr>
+                                            <td>${p.nome}</td>
+                                            <td></td><td></td><td></td><td></td>
+                                            <td style="background-color: #f9f9f9"></td>
+                                        </tr>
+                                    `).join('')}
                                 `).join('')}
                             </tbody>
                         </table>
@@ -544,7 +562,7 @@
                             </div>
                         </div>
                         <div className="flex items-center gap-4 text-xs">
-                            <button onClick={() => setTheme(prev => prev === 'dark' ? 'light' : 'dark')} className="p-1.5 rounded-full hover:bg-slate-700 transition-colors" title="Alternar Tema">
+                            <button onClick={toggleTheme} className="p-1.5 rounded-full hover:bg-slate-700 transition-colors" title="Alternar Tema">
                                 {isDark ? <Icons.Sun size={16} /> : <Icons.Moon size={16} />}
                             </button>
                             <button onClick={() => setShowFichaModal(true)} className="p-1.5 px-3 rounded-full hover:bg-blue-600 bg-blue-500 text-white transition-colors flex items-center gap-1 font-bold">
