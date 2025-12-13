@@ -76,7 +76,8 @@
             Building2 = IconFallback, Lock = IconFallback, Truck = IconFallback, 
             Info = IconFallback, DollarSign = IconFallback, Activity = IconFallback, 
             ShoppingCart = IconFallback, PackageX = IconFallback, BarChart3 = IconFallback, 
-            Moon = IconFallback, Sun = IconFallback, Filter = IconFallback, FileX = IconFallback
+            Moon = IconFallback, Sun = IconFallback, Filter = IconFallback, FileX = IconFallback,
+            FileText = IconFallback, ArrowUpDown = IconFallback, Printer = IconFallback
         } = LucideIcons;
 
         // --- UTILITÁRIOS ---
@@ -346,6 +347,7 @@
             const [activeTab, setActiveTab] = useState('visao_geral');
             const [theme, setTheme] = useState('system');
             const [isDark, setIsDark] = useState(false);
+            const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
 
             useEffect(() => {
                 const check = () => window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -373,6 +375,20 @@
                 return null;
             }, [dadosBI, periodoSelecionado, categoriaSelecionada, catalogoFull]);
 
+            const dadosEvolucao = useMemo(() => {
+                if (dadosBI?.tipo === 'INDIVIDUAL' && dadosBI.unidade && catalogoFull) {
+                    const dados = [];
+                    for (let i = 1; i < dadosBI.unidade.contagens.length; i++) {
+                        const calculo = calcularKPIsUnidade(dadosBI.unidade, i, categoriaSelecionada, dadosBI.key, catalogoFull);
+                        if (calculo) {
+                            dados.push({ name: calculo.periodoLabel, Vendas: calculo.vendaFinanceira, Perdas: calculo.perdaFinanceira, Percentual: parseFloat(calculo.percentualPerda.toFixed(1)) });
+                        }
+                    }
+                    return dados;
+                }
+                return [];
+            }, [dadosBI, categoriaSelecionada, catalogoFull]);
+
             const dadosConsolidados = useMemo(() => {
                 if (dadosBI?.tipo === 'CONSOLIDADO') {
                     const filiaisValidas = dadosBI.filiais.filter(f => f.dados);
@@ -391,20 +407,6 @@
                 return null;
             }, [dadosBI]);
 
-            const dadosEvolucao = useMemo(() => {
-                if (dadosBI?.tipo === 'INDIVIDUAL' && dadosBI.unidade && catalogoFull) {
-                    const dados = [];
-                    for (let i = 1; i < dadosBI.unidade.contagens.length; i++) {
-                        const calculo = calcularKPIsUnidade(dadosBI.unidade, i, categoriaSelecionada, dadosBI.key, catalogoFull);
-                        if (calculo) {
-                            dados.push({ name: calculo.periodoLabel, Vendas: calculo.vendaFinanceira, Perdas: calculo.perdaFinanceira, Percentual: parseFloat(calculo.percentualPerda.toFixed(1)) });
-                        }
-                    }
-                    return dados;
-                }
-                return [];
-            }, [dadosBI, categoriaSelecionada, catalogoFull]);
-
             const totaisTabela = useMemo(() => {
                 if (!dadosAtuais) return null;
                 return dadosAtuais.detalhes.reduce((acc, item) => {
@@ -415,15 +417,130 @@
                 }, { inicial: 0, entrada: 0, vendas: 0, teorico: 0, final: 0, diferenca: 0, perdaFinanceira: 0, margemContrib: 0 });
             }, [dadosAtuais]);
 
+             // Sorting Logic
+            const requestSort = (key) => {
+                let direction = 'ascending';
+                if (sortConfig.key === key && sortConfig.direction === 'ascending') {
+                    direction = 'descending';
+                }
+                setSortConfig({ key, direction });
+            };
+
+            const sortedItems = useMemo(() => {
+                if (!dadosAtuais) return [];
+                let sortableItems = [...dadosAtuais.detalhes];
+                if (sortConfig.key !== null) {
+                    sortableItems.sort((a, b) => {
+                        if (a[sortConfig.key] < b[sortConfig.key]) {
+                            return sortConfig.direction === 'ascending' ? -1 : 1;
+                        }
+                        if (a[sortConfig.key] > b[sortConfig.key]) {
+                            return sortConfig.direction === 'ascending' ? 1 : -1;
+                        }
+                        return 0;
+                    });
+                }
+                return sortableItems;
+            }, [dadosAtuais, sortConfig]);
+
+            // Função para gerar ficha de contagem
+            const gerarFichaContagem = () => {
+                const win = window.open('', '_blank');
+                
+                // Pegar todos os produtos do catalogo atual
+                if (!catalogoFull) return;
+                const latestKey = Object.keys(catalogoFull).sort().reverse()[0];
+                const catalogo = catalogoFull[latestKey];
+                
+                // Filtrar por categoria se necessário
+                const produtosFiltrados = Object.keys(catalogo)
+                    .map(key => catalogo[key])
+                    .filter(p => categoriaSelecionada === 'TODAS' || p.categoria === categoriaSelecionada)
+                    .sort((a, b) => a.nome.localeCompare(b.nome));
+
+                const html = `
+                    <html>
+                    <head>
+                        <title>Ficha de Contagem - ${categoriaSelecionada}</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; font-size: 12px; }
+                            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                            th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+                            th { background-color: #f0f0f0; }
+                            .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #000; padding-bottom: 10px; }
+                            @media print {
+                                .no-print { display: none; }
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="header">
+                            <div>
+                                <h1>Ficha de Contagem de Estoque</h1>
+                                <p><strong>Categoria:</strong> ${categoriaSelecionada === 'TODAS' ? 'Geral' : categoriaSelecionada}</p>
+                                <p><strong>Data:</strong> ____/____/_______</p>
+                                <p><strong>Responsável:</strong> ________________________</p>
+                            </div>
+                            <button class="no-print" onclick="window.print()">IMPRIMIR FICHA</button>
+                        </div>
+
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 40%">Produto</th>
+                                    <th style="width: 15%">Categoria</th>
+                                    <th>Prateleira</th>
+                                    <th>Geladeira</th>
+                                    <th>Depósito</th>
+                                    <th>Extra</th>
+                                    <th style="background-color: #e0e0e0">TOTAL</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${produtosFiltrados.map(p => `
+                                    <tr>
+                                        <td>${p.nome}</td>
+                                        <td>${p.categoria}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td style="background-color: #f9f9f9"></td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </body>
+                    </html>
+                `;
+                
+                win.document.write(html);
+                win.document.close();
+            };
+
             if (!isAuthenticated) return <LoginScreen onLogin={() => setIsAuthenticated(true)} />;
 
             return (
                 <div className={`min-h-screen font-sans transition-colors duration-300 ${isDark ? 'bg-slate-900 text-slate-100' : 'bg-slate-50 text-slate-800'}`}>
+                    
                     {/* Top Bar */}
                     <div className={`px-6 py-3 flex justify-between items-center shadow-md transition-colors ${isDark ? 'bg-slate-950 text-white' : 'bg-slate-900 text-white'}`}>
-                        <div className="flex items-center gap-3"><Building2 size={18} className="text-blue-400" /><div><div className="text-xs font-bold tracking-widest text-blue-200">CARATININGA LTDA</div><div className="text-sm font-semibold">Intelligence Dashboard</div></div></div>
+                        <div className="flex items-center gap-3">
+                            <Building2 size={18} className="text-blue-400" />
+                            <div>
+                                <div className="text-xs font-bold tracking-widest text-blue-200">CARATININGA LTDA</div>
+                                <div className="text-sm font-semibold">Intelligence Dashboard</div>
+                            </div>
+                        </div>
                         <div className="flex items-center gap-4 text-xs">
-                            <button onClick={() => setTheme(prev => prev === 'dark' ? 'light' : 'dark')} className="p-1.5 rounded-full hover:bg-slate-700 transition-colors" title="Tema">{isDark ? <Sun size={16} /> : <Moon size={16} />}</button>
+                            {/* Botão Tema */}
+                            <button onClick={() => setTheme(prev => prev === 'dark' ? 'light' : 'dark')} className="p-1.5 rounded-full hover:bg-slate-700 transition-colors" title="Tema">
+                                {isDark ? <Sun size={16} /> : <Moon size={16} />}
+                            </button>
+                             {/* Botão Gerar Ficha */}
+                             <button onClick={gerarFichaContagem} className="p-1.5 px-3 rounded-full hover:bg-blue-600 bg-blue-500 text-white transition-colors flex items-center gap-1" title="Gerar Ficha">
+                                <Printer size={14} /> Ficha
+                            </button>
                             <div className="hidden md:flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Online</div>
                             <button onClick={() => setIsAuthenticated(false)} className="hover:text-red-300 transition-colors">Sair</button>
                         </div>
@@ -659,19 +776,19 @@
                                             <table className="w-full text-sm text-left">
                                                 <thead className={`font-semibold border-b whitespace-nowrap ${isDark ? 'bg-slate-900 text-slate-400 border-slate-700' : 'bg-slate-50 text-slate-500 border-slate-200'}`}>
                                                     <tr>
-                                                        <th className="px-4 py-3">Produto</th>
-                                                        <th className="px-4 py-3 text-center">Anterior</th>
-                                                        <th className="px-4 py-3 text-center text-green-600">(+) Ent.</th>
-                                                        <th className="px-4 py-3 text-center text-red-400">(-) Sai.</th>
-                                                        <th className="px-4 py-3 text-center text-blue-500">(=) Teórico</th>
-                                                        <th className="px-4 py-3 text-center bg-slate-100 dark:bg-slate-700/50">Atual</th>
-                                                        <th className="px-4 py-3 text-center">Dif.</th>
-                                                        <th className="px-4 py-3 text-right">Perda R$</th>
-                                                        <th className="px-4 py-3 text-center">Status</th>
+                                                        <th className="px-4 py-3 cursor-pointer hover:bg-black/5" onClick={() => requestSort('nome')}>Produto <ArrowUpDown size={12} className="inline ml-1" /></th>
+                                                        <th className="px-4 py-3 text-center cursor-pointer hover:bg-black/5" onClick={() => requestSort('inicial')}>Anterior <ArrowUpDown size={12} className="inline ml-1" /></th>
+                                                        <th className="px-4 py-3 text-center text-green-600 cursor-pointer hover:bg-black/5" onClick={() => requestSort('entrada')}>(+) Ent. <ArrowUpDown size={12} className="inline ml-1" /></th>
+                                                        <th className="px-4 py-3 text-center text-red-400 cursor-pointer hover:bg-black/5" onClick={() => requestSort('vendas')}>(-) Sai. <ArrowUpDown size={12} className="inline ml-1" /></th>
+                                                        <th className="px-4 py-3 text-center text-blue-500 cursor-pointer hover:bg-black/5" onClick={() => requestSort('teorico')}>(=) Teórico <ArrowUpDown size={12} className="inline ml-1" /></th>
+                                                        <th className="px-4 py-3 text-center bg-slate-100 dark:bg-slate-700/50 cursor-pointer hover:bg-black/5" onClick={() => requestSort('final')}>Atual <ArrowUpDown size={12} className="inline ml-1" /></th>
+                                                        <th className="px-4 py-3 text-center cursor-pointer hover:bg-black/5" onClick={() => requestSort('diferenca')}>Dif. <ArrowUpDown size={12} className="inline ml-1" /></th>
+                                                        <th className="px-4 py-3 text-right cursor-pointer hover:bg-black/5" onClick={() => requestSort('perdaFinanceira')}>Perda R$ <ArrowUpDown size={12} className="inline ml-1" /></th>
+                                                        <th className="px-4 py-3 text-center cursor-pointer hover:bg-black/5" onClick={() => requestSort('status')}>Status <ArrowUpDown size={12} className="inline ml-1" /></th>
                                                     </tr>
                                                 </thead>
                                                 <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
-                                                    {dadosAtuais.detalhes.map((item) => (
+                                                    {sortedItems.map((item) => (
                                                         <tr key={item.id} className={`transition-colors ${isDark ? 'hover:bg-slate-700' : 'hover:bg-slate-50'}`}>
                                                             <td className="px-4 py-3 font-medium">{item.nome}</td>
                                                             <td className="px-4 py-3 text-center opacity-70">{item.inicial}</td>
