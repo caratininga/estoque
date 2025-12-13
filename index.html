@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-PT">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,10 +13,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prop-types/15.8.1/prop-types.min.js"></script>
     
     <!-- Recharts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/recharts/2.5.0/Recharts.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/recharts/2.10.3/Recharts.min.js"></script>
     
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@0.263.1"></script>
+    <!-- Lucide React (Versão UMD - Correção dos ícones) -->
+    <script src="https://unpkg.com/lucide-react@0.294.0/dist/umd/lucide-react.min.js"></script>
     
     <!-- Babel -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -33,9 +33,12 @@
         .dark ::-webkit-scrollbar-thumb { background: #475569; }
         .dark ::-webkit-scrollbar-thumb:hover { background: #64748b; }
         
-        /* Animation for sorting arrow */
-        .sort-icon { transition: transform 0.2s; }
-        .sort-asc { transform: rotate(180deg); }
+        /* Estilos de Impressão para a Ficha */
+        @media print {
+            body * { visibility: hidden; }
+            #print-section, #print-section * { visibility: visible; }
+            #print-section { position: absolute; left: 0; top: 0; width: 100%; }
+        }
     </style>
 </head>
 <body>
@@ -50,31 +53,17 @@
             BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
             PieChart, Pie, Cell, ComposedChart, Line, LabelList
         } = RechartsObj;
-        const chartsAvailable = !!(BarChart && PieChart && ComposedChart);
-
-        // --- LUCIDE ICONS ADAPTER ---
-        const createLucideIcon = (iconName, iconDef) => {
-            if (!iconDef) return null;
-            return ({ color, size, className, ...props }) => {
-                const [tag, attrs, children] = iconDef;
-                const childElements = (children || []).map(([childTag, childAttrs], index) => 
-                    React.createElement(childTag, { ...childAttrs, key: index })
-                );
-                return React.createElement(tag, {
-                    ...attrs, ...props,
-                    width: size || 24, height: size || 24, stroke: color || 'currentColor',
-                    className: `lucide lucide-${iconName} ${className || ''}`.trim(),
-                }, ...childElements);
-            };
-        };
-        const LucideObj = window.lucide || {};
-        const LucideIcons = Object.keys(LucideObj.icons || {}).reduce((acc, key) => {
-            acc[key] = createLucideIcon(key, LucideObj.icons[key]);
-            return acc;
-        }, {});
         
-        // Fallback for missing icons
-        const IconFallback = () => <span />;
+        const chartsAvailable = !!(BarChart && PieChart && ComposedChart);
+        const SafeChart = ({ children }) => chartsAvailable ? children : <div className="flex items-center justify-center h-full text-gray-400 text-sm">Gráfico indisponível</div>;
+
+        // --- ICONS (LUCIDE REACT UMD) ---
+        // Acessa a biblioteca global carregada pelo script UMD
+        const Lucide = window.lucideReact || {};
+        
+        // Fallback caso a biblioteca falhe
+        const IconFallback = () => <span className="w-4 h-4 inline-block bg-gray-300 rounded-full" title="Icone ausente"></span>;
+        
         const { 
             TrendingDown = IconFallback, Calendar = IconFallback, AlertCircle = IconFallback, 
             CheckCircle = IconFallback, TrendingUp = IconFallback, LayoutGrid = IconFallback, 
@@ -84,18 +73,18 @@
             ShoppingCart = IconFallback, PackageX = IconFallback, BarChart3 = IconFallback, 
             Moon = IconFallback, Sun = IconFallback, Filter = IconFallback, FileX = IconFallback,
             FileText = IconFallback, ArrowUpDown = IconFallback, Printer = IconFallback,
-            ArrowUp = IconFallback, ArrowDown = IconFallback
-        } = LucideIcons;
+            ArrowUp = IconFallback, ArrowDown = IconFallback, X = IconFallback, Search = IconFallback
+        } = Lucide;
 
         // --- UTILITÁRIOS ---
-        const formatCurrency = (val) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
+        const formatCurrency = (val) => new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' }).format(val);
         const formatDate = (dateStr) => {
             if (!dateStr) return "-";
             const [year, month, day] = dateStr.split('-');
             return `${day}/${month}`;
         };
 
-        // --- COMPONENTES ---
+        // --- COMPONENTES UI ---
         const StatusBadge = ({ type, text }) => {
             const colors = {
                 critico: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100',
@@ -108,10 +97,10 @@
         };
 
         const SortIcon = ({ active, direction }) => {
-            if (!active) return <ArrowUpDown size={14} className="ml-1 text-slate-400" />;
+            if (!active) return <ArrowUpDown size={14} className="ml-1 text-slate-400 inline opacity-40" />;
             return direction === 'ascending' 
-                ? <ArrowUp size={14} className="ml-1 text-blue-600 dark:text-blue-400" /> 
-                : <ArrowDown size={14} className="ml-1 text-blue-600 dark:text-blue-400" />;
+                ? <ArrowUp size={14} className="ml-1 text-blue-600 dark:text-blue-400 inline" /> 
+                : <ArrowDown size={14} className="ml-1 text-blue-600 dark:text-blue-400 inline" />;
         };
 
         const LoginScreen = ({ onLogin }) => {
@@ -149,7 +138,7 @@
                 <h3 className={`text-xl font-bold mb-2 ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>Nenhum dado encontrado</h3>
                 <p className={`max-w-md mb-6 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{message}</p>
                 <div className={`text-xs p-3 rounded text-left font-mono ${isDark ? 'bg-slate-900 text-slate-400' : 'bg-slate-200 text-slate-600'}`}>
-                    Dica: Verifique se a pasta 'data/' existe na raiz e contém catalogo.json e as pastas das filiais.
+                    Dica: Verifique a estrutura da pasta 'data/' no repositório.
                 </div>
             </div>
         );
@@ -183,8 +172,8 @@
             const atual = dadosUnidade.contagens[indicePeriodo];
             const anterior = dadosUnidade.contagens[indicePeriodo - 1];
             const catalogo = getCatalogoPorData(catalogoFull, atual.data);
-            
             const keyPeriodo = `${anterior.data}_${atual.data}`;
+            
             const vendas = dadosUnidade.vendas[keyPeriodo] || {};
             const entradas = dadosUnidade.entradas[keyPeriodo] || {};
 
@@ -273,7 +262,6 @@
             const [loading, setLoading] = useState(true);
             const [error, setError] = useState(null);
 
-            // Fetch helper
             const safeFetch = async (url) => {
                 try {
                     const res = await fetch(url);
@@ -291,7 +279,7 @@
                     if (data) setCatalogo(data);
                     else {
                         setLoading(false);
-                        setError("Catálogo não encontrado ou erro de carregamento.");
+                        setError("Catálogo não encontrado.");
                     }
                 };
                 loadCatalogo();
@@ -324,7 +312,7 @@
                             const resultados = await Promise.all(promises);
                             const validos = resultados.filter(r => r.dados !== null);
                             
-                            if (validos.length === 0) throw new Error("Nenhum dado válido encontrado para as filiais.");
+                            if (validos.length === 0) throw new Error("Nenhum dado válido encontrado.");
                             setDados({ tipo: 'CONSOLIDADO', filiais: resultados });
 
                         } else {
@@ -338,8 +326,8 @@
                             setDados({ tipo: 'INDIVIDUAL', unidade: { contagens, vendas, entradas }, key: unidadeSelecionada });
                         }
                     } catch (err) {
-                        console.error("Erro ao carregar dados:", err);
-                        setError(err.message || "Erro ao carregar os dados.");
+                        console.error("Erro:", err);
+                        setError("Não foi possível carregar os dados.");
                         setDados(null);
                     } finally {
                         setLoading(false);
@@ -361,9 +349,10 @@
             const [activeTab, setActiveTab] = useState('visao_geral');
             const [theme, setTheme] = useState('system');
             const [isDark, setIsDark] = useState(false);
-            const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
             
-            // Estado para o modal de geração de ficha
+            // Estado de Ordenação
+            const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
+            // Modal Ficha
             const [showFichaModal, setShowFichaModal] = useState(false);
             const [fichaCategoria, setFichaCategoria] = useState('TODAS');
 
@@ -374,7 +363,6 @@
 
             const { dadosBI, loading, error, catalogoFull } = useDadosReais(unidadeAtual, categoriaSelecionada);
 
-            // Helpers
             const categoriasDisponiveis = useMemo(() => {
                 if (!catalogoFull) return ["TODAS"];
                 const cats = new Set();
@@ -449,28 +437,28 @@
                 let sortableItems = [...dadosAtuais.detalhes];
                 if (sortConfig.key !== null) {
                     sortableItems.sort((a, b) => {
-                        if (a[sortConfig.key] < b[sortConfig.key]) {
-                            return sortConfig.direction === 'ascending' ? -1 : 1;
-                        }
-                        if (a[sortConfig.key] > b[sortConfig.key]) {
-                            return sortConfig.direction === 'ascending' ? 1 : -1;
-                        }
+                        let valA = a[sortConfig.key];
+                        let valB = b[sortConfig.key];
+                        
+                        if (typeof valA === 'string') valA = valA.toLowerCase();
+                        if (typeof valB === 'string') valB = valB.toLowerCase();
+
+                        if (valA < valB) return sortConfig.direction === 'ascending' ? -1 : 1;
+                        if (valA > valB) return sortConfig.direction === 'ascending' ? 1 : -1;
                         return 0;
                     });
                 }
                 return sortableItems;
             }, [dadosAtuais, sortConfig]);
 
-            // Função para gerar ficha de contagem
+            // Gerador de Ficha
             const gerarFichaContagem = () => {
                 const win = window.open('', '_blank');
                 
-                // Pegar todos os produtos do catalogo atual
                 if (!catalogoFull) return;
                 const latestKey = Object.keys(catalogoFull).sort().reverse()[0];
                 const catalogo = catalogoFull[latestKey];
                 
-                // Filtrar por categoria selecionada no modal
                 const produtosFiltrados = Object.keys(catalogo)
                     .map(key => catalogo[key])
                     .filter(p => fichaCategoria === 'TODAS' || p.categoria === fichaCategoria)
@@ -486,9 +474,7 @@
                             th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
                             th { background-color: #f0f0f0; }
                             .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #000; padding-bottom: 10px; }
-                            @media print {
-                                .no-print { display: none; }
-                            }
+                            @media print { .no-print { display: none; } }
                         </style>
                     </head>
                     <body>
@@ -499,13 +485,12 @@
                                 <p><strong>Data:</strong> ____/____/_______</p>
                                 <p><strong>Responsável:</strong> ________________________</p>
                             </div>
-                            <button class="no-print" onclick="window.print()">IMPRIMIR FICHA</button>
+                            <button class="no-print" onclick="window.print()" style="padding: 10px 20px; font-size: 14px; cursor: pointer;">IMPRIMIR FICHA</button>
                         </div>
-
                         <table>
                             <thead>
                                 <tr>
-                                    <th style="width: 40%">Produto</th>
+                                    <th style="width: 35%">Produto</th>
                                     <th style="width: 15%">Categoria</th>
                                     <th>Local 1</th>
                                     <th>Local 2</th>
@@ -519,10 +504,7 @@
                                     <tr>
                                         <td>${p.nome}</td>
                                         <td>${p.categoria}</td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
+                                        <td></td><td></td><td></td><td></td>
                                         <td style="background-color: #f9f9f9"></td>
                                     </tr>
                                 `).join('')}
@@ -531,7 +513,6 @@
                     </body>
                     </html>
                 `;
-                
                 win.document.write(html);
                 win.document.close();
                 setShowFichaModal(false);
@@ -552,30 +533,31 @@
                             </div>
                         </div>
                         <div className="flex items-center gap-4 text-xs">
-                            {/* Botão Tema */}
                             <button onClick={() => setTheme(prev => prev === 'dark' ? 'light' : 'dark')} className="p-1.5 rounded-full hover:bg-slate-700 transition-colors" title="Alternar Tema">
                                 {isDark ? <Sun size={16} /> : <Moon size={16} />}
                             </button>
-                             {/* Botão Abrir Modal de Ficha */}
-                             <button onClick={() => setShowFichaModal(true)} className="p-1.5 px-3 rounded-full hover:bg-blue-600 bg-blue-500 text-white transition-colors flex items-center gap-1" title="Gerar Ficha">
-                                <Printer size={14} /> Ficha
+                            <button onClick={() => setShowFichaModal(true)} className="p-1.5 px-3 rounded-full hover:bg-blue-600 bg-blue-500 text-white transition-colors flex items-center gap-1 font-bold">
+                                <Printer size={14} /> <span className="hidden md:inline">Gerar Ficha</span>
                             </button>
                             <div className="hidden md:flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Online</div>
                             <button onClick={() => setIsAuthenticated(false)} className="hover:text-red-300 transition-colors">Sair</button>
                         </div>
                     </div>
 
-                    {/* Modal de Geração de Ficha */}
+                    {/* Modal Gerar Ficha */}
                     {showFichaModal && (
                         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                            <div className={`p-6 rounded-xl shadow-xl w-full max-w-sm ${isDark ? 'bg-slate-800 text-white' : 'bg-white text-slate-800'}`}>
-                                <h3 className="text-lg font-bold mb-4">Gerar Ficha de Contagem</h3>
-                                <div className="mb-4">
-                                    <label className="block text-sm font-medium mb-1">Filtrar por Categoria</label>
+                            <div className={`p-6 rounded-xl shadow-xl w-full max-w-sm border ${isDark ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-800'}`}>
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="text-lg font-bold">Imprimir Ficha de Contagem</h3>
+                                    <button onClick={() => setShowFichaModal(false)}><X size={20} /></button>
+                                </div>
+                                <div className="mb-6">
+                                    <label className="block text-sm font-medium mb-2 opacity-70">Selecione a Categoria</label>
                                     <select 
                                         value={fichaCategoria}
                                         onChange={(e) => setFichaCategoria(e.target.value)}
-                                        className={`w-full border rounded p-2 text-sm ${isDark ? 'bg-slate-700 border-slate-600' : 'bg-slate-50 border-slate-200'}`}
+                                        className={`w-full border rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500 ${isDark ? 'bg-slate-700 border-slate-600' : 'bg-slate-50 border-slate-200'}`}
                                     >
                                         {categoriasDisponiveis.map(cat => (
                                             <option key={cat} value={cat}>{cat === 'TODAS' ? 'Todas as Categorias' : cat}</option>
@@ -583,8 +565,10 @@
                                     </select>
                                 </div>
                                 <div className="flex justify-end gap-2">
-                                    <button onClick={() => setShowFichaModal(false)} className="px-4 py-2 text-sm rounded hover:bg-slate-200 dark:hover:bg-slate-700">Cancelar</button>
-                                    <button onClick={gerarFichaContagem} className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 font-bold">Gerar & Imprimir</button>
+                                    <button onClick={() => setShowFichaModal(false)} className={`px-4 py-2 text-sm rounded font-medium ${isDark ? 'hover:bg-slate-700' : 'hover:bg-slate-100'}`}>Cancelar</button>
+                                    <button onClick={gerarFichaContagem} className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 font-bold flex items-center gap-2">
+                                        <Printer size={14} /> Gerar & Imprimir
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -594,8 +578,14 @@
                     <header className={`border-b sticky top-0 z-30 px-6 py-4 shadow-sm transition-colors ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
                         <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 max-w-7xl mx-auto">
                             <div className="flex flex-col md:flex-row gap-4 w-full xl:w-auto">
-                                <div className="flex flex-col gap-1 w-full md:w-auto"><label className="text-[10px] font-bold uppercase flex items-center gap-1 opacity-60"><MapPin size={10} /> Escopo</label><select value={unidadeAtual} onChange={(e) => { setUnidadeAtual(e.target.value); setPeriodoSelecionado(0); }} className={`font-bold text-lg py-2 pl-3 pr-10 rounded-lg outline-none cursor-pointer w-full md:w-auto md:min-w-[280px] appearance-none ${isDark ? 'bg-slate-700 text-white' : 'bg-slate-100 text-slate-800'}`} style={{backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22${isDark ? '%23ffffff' : '%23131313'}%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right .7em top 50%', backgroundSize: '.65em auto'}}><option value="TODAS">TODAS AS UNIDADES</option><option disabled>──────────────</option>{Object.keys(FILIAIS_CONFIG).map((key) => <option key={key} value={key}>{FILIAIS_CONFIG[key].nome}</option>)}</select></div>
-                                <div className="flex flex-col gap-1 w-full md:w-auto"><label className="text-[10px] font-bold uppercase flex items-center gap-1 opacity-60"><Filter size={10} /> Categoria</label><select value={categoriaSelecionada} onChange={(e) => setCategoriaSelecionada(e.target.value)} className={`border font-medium text-sm py-2 px-3 rounded-lg outline-none cursor-pointer w-full md:w-48 ${isDark ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-slate-200 text-slate-700'}`}>{categoriasDisponiveis.map(cat => <option key={cat} value={cat}>{cat === 'TODAS' ? 'Todas as Bebidas' : cat}</option>)}</select></div>
+                                <div className="flex flex-col gap-1 w-full md:w-auto">
+                                    <label className="text-[10px] font-bold uppercase flex items-center gap-1 opacity-60"><MapPin size={10} /> Escopo</label>
+                                    <select value={unidadeAtual} onChange={(e) => { setUnidadeAtual(e.target.value); setPeriodoSelecionado(0); }} className={`font-bold text-lg py-2 pl-3 pr-10 rounded-lg outline-none cursor-pointer w-full md:w-auto md:min-w-[280px] appearance-none ${isDark ? 'bg-slate-700 text-white' : 'bg-slate-100 text-slate-800'}`} style={{backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22${isDark ? '%23ffffff' : '%23131313'}%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right .7em top 50%', backgroundSize: '.65em auto'}}><option value="TODAS">TODAS AS UNIDADES</option><option disabled>──────────────</option>{Object.keys(FILIAIS_CONFIG).map((key) => <option key={key} value={key}>{FILIAIS_CONFIG[key].nome}</option>)}</select>
+                                </div>
+                                <div className="flex flex-col gap-1 w-full md:w-auto">
+                                    <label className="text-[10px] font-bold uppercase flex items-center gap-1 opacity-60"><Filter size={10} /> Categoria</label>
+                                    <select value={categoriaSelecionada} onChange={(e) => setCategoriaSelecionada(e.target.value)} className={`border font-medium text-sm py-2 px-3 rounded-lg outline-none cursor-pointer w-full md:w-48 ${isDark ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-slate-200 text-slate-700'}`}>{categoriasDisponiveis.map(cat => <option key={cat} value={cat}>{cat === 'TODAS' ? 'Todas as Bebidas' : cat}</option>)}</select>
+                                </div>
                                 {unidadeAtual !== 'TODAS' && dadosBI?.unidade?.contagens && (
                                     <div className="flex flex-col gap-1 w-full md:w-auto"><label className="text-[10px] font-bold uppercase flex items-center gap-1 opacity-60"><Calendar size={10} /> Período</label><select value={periodoSelecionado} onChange={(e) => setPeriodoSelecionado(Number(e.target.value))} className={`border font-medium text-sm py-2 px-3 rounded-lg outline-none cursor-pointer w-full md:w-48 ${isDark ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-slate-200 text-slate-700'}`}>{dadosBI.unidade.contagens.map((c, idx) => idx > 0 && <option key={c.id} value={idx}>Inv. {formatDate(c.data)}</option>)}</select></div>
                                 )}
@@ -616,15 +606,13 @@
                     <main className="p-6 max-w-7xl mx-auto">
                         {loading && <div className="text-center py-20 opacity-50 animate-pulse">Carregando dados...</div>}
                         
-                        {/* ESTADO VAZIO / ERRO DE FETCH */}
                         {!loading && (!dadosBI || (unidadeAtual === 'TODAS' && !dadosConsolidados) || (unidadeAtual !== 'TODAS' && !dadosAtuais)) && (
                             <EmptyState message={error || "Não foi possível carregar os dados de controle de estoque."} isDark={isDark} />
                         )}
 
-                        {/* CONTEÚDO REAL SE HOUVER DADOS */}
+                        {/* CONTEÚDO REAL */}
                         {!loading && !error && unidadeAtual === 'TODAS' && dadosConsolidados && chartsAvailable && (
                             <div className="animate-in slide-in-from-bottom-4 duration-500">
-                                {/* ... [MANTIDO IGUAL AO ANTERIOR] ... */}
                                 <div className="mb-6 flex items-center gap-2 opacity-80"><Building2 /><h2 className="text-xl font-bold">Visão Consolidada</h2></div>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                                     <div className={`p-6 rounded-2xl border shadow-sm ${isDark ? 'bg-slate-800 border-red-900/50' : 'bg-gradient-to-br from-red-50 to-white border-red-100'}`}>
@@ -645,31 +633,35 @@
                                     <div className={`p-6 rounded-xl border shadow-sm ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
                                         <h3 className="text-lg font-bold mb-4">Ranking de Prejuízo (R$)</h3>
                                         <div className="h-72">
-                                            <ResponsiveContainer width="100%" height="100%">
-                                                <BarChart data={dadosConsolidados.rankingPerda} layout="vertical" margin={{left: 20, right: 30}}>
-                                                    <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke={isDark ? '#334155' : '#e2e8f0'} />
-                                                    <XAxis type="number" hide />
-                                                    <YAxis dataKey="name" type="category" width={100} tick={{fontWeight: 'bold', fill: isDark ? '#94a3b8' : '#334155'}} />
-                                                    <Tooltip formatter={(v) => formatCurrency(v)} contentStyle={{backgroundColor: isDark ? '#0f172a' : '#fff'}} />
-                                                    <Bar dataKey="perda" fill="#ef4444" radius={[0,4,4,0]} barSize={30}>
-                                                        <LabelList dataKey="perda" position="right" formatter={(v) => formatCurrency(v)} fill={isDark ? '#fff' : '#000'} fontSize={10} />
-                                                    </Bar>
-                                                </BarChart>
-                                            </ResponsiveContainer>
+                                            <SafeChart>
+                                                <ResponsiveContainer width="100%" height="100%">
+                                                    <BarChart data={dadosConsolidados.rankingPerda} layout="vertical" margin={{left: 20, right: 30}}>
+                                                        <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke={isDark ? '#334155' : '#e2e8f0'} />
+                                                        <XAxis type="number" hide />
+                                                        <YAxis dataKey="name" type="category" width={100} tick={{fontWeight: 'bold', fill: isDark ? '#94a3b8' : '#334155'}} />
+                                                        <Tooltip formatter={(v) => formatCurrency(v)} contentStyle={{backgroundColor: isDark ? '#0f172a' : '#fff'}} />
+                                                        <Bar dataKey="perda" fill="#ef4444" radius={[0,4,4,0]} barSize={30}>
+                                                            <LabelList dataKey="perda" position="right" formatter={(v) => formatCurrency(v)} fill={isDark ? '#fff' : '#000'} fontSize={10} />
+                                                        </Bar>
+                                                    </BarChart>
+                                                </ResponsiveContainer>
+                                            </SafeChart>
                                         </div>
                                     </div>
                                     <div className={`p-6 rounded-xl border shadow-sm ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
                                         <h3 className="text-lg font-bold mb-4">Benchmarking: Acuracidade</h3>
                                         <div className="h-72">
-                                            <ResponsiveContainer width="100%" height="100%">
-                                                <BarChart data={dadosConsolidados.rankingEficiencia} layout="vertical" margin={{left: 20}}>
-                                                    <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke={isDark ? '#334155' : '#e2e8f0'} />
-                                                    <XAxis type="number" domain={[0, 100]} hide />
-                                                    <YAxis dataKey="name" type="category" width={100} tick={{fontWeight: 'bold', fill: isDark ? '#94a3b8' : '#334155'}} />
-                                                    <Tooltip formatter={(v) => `${v.toFixed(1)}%`} contentStyle={{backgroundColor: isDark ? '#0f172a' : '#fff'}} />
-                                                    <Bar dataKey="acuracidade" fill="#3b82f6" radius={[0,4,4,0]} barSize={30} />
-                                                </BarChart>
-                                            </ResponsiveContainer>
+                                            <SafeChart>
+                                                <ResponsiveContainer width="100%" height="100%">
+                                                    <BarChart data={dadosConsolidados.rankingEficiencia} layout="vertical" margin={{left: 20}}>
+                                                        <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke={isDark ? '#334155' : '#e2e8f0'} />
+                                                        <XAxis type="number" domain={[0, 100]} hide />
+                                                        <YAxis dataKey="name" type="category" width={100} tick={{fontWeight: 'bold', fill: isDark ? '#94a3b8' : '#334155'}} />
+                                                        <Tooltip formatter={(v) => `${v.toFixed(1)}%`} contentStyle={{backgroundColor: isDark ? '#0f172a' : '#fff'}} />
+                                                        <Bar dataKey="acuracidade" fill="#3b82f6" radius={[0,4,4,0]} barSize={30} />
+                                                    </BarChart>
+                                                </ResponsiveContainer>
+                                            </SafeChart>
                                         </div>
                                     </div>
                                 </div>
@@ -754,18 +746,20 @@
                                             <div className={`p-6 rounded-xl border shadow-sm mb-6 ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
                                                 <h3 className="text-lg font-bold mb-6 flex items-center gap-2"><TrendingUp size={20} className="text-blue-500" /> Evolução</h3>
                                                 <div className="h-80 w-full">
-                                                    <ResponsiveContainer width="100%" height="100%">
-                                                        <ComposedChart data={dadosEvolucao}>
-                                                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDark ? '#334155' : '#f1f5f9'} />
-                                                            <XAxis dataKey="name" tick={{fontSize: 12, fill: isDark ? '#94a3b8' : '#64748b'}} tickLine={false} axisLine={false} dy={10} />
-                                                            <YAxis yAxisId="left" orientation="left" stroke="#3b82f6" tickFormatter={(v) => `R$${v}`} tickLine={false} axisLine={false} />
-                                                            <YAxis yAxisId="right" orientation="right" stroke="#ef4444" tickFormatter={(v) => `R$${v}`} tickLine={false} axisLine={false} />
-                                                            <Tooltip formatter={(value, name) => [formatCurrency(Number(value)), name === "Perdas" ? "Prejuízo" : "Vendas"]} contentStyle={{backgroundColor: isDark ? '#0f172a' : '#fff'}} />
-                                                            <Legend iconType="circle" />
-                                                            <Bar yAxisId="left" dataKey="Vendas" fill="#3b82f6" radius={[4, 4, 0, 0]} name="Vendas" barSize={50} />
-                                                            <Line yAxisId="right" type="monotone" dataKey="Perdas" stroke="#ef4444" strokeWidth={3} dot={{r: 4}} name="Perdas" />
-                                                        </ComposedChart>
-                                                    </ResponsiveContainer>
+                                                    <SafeChart>
+                                                        <ResponsiveContainer width="100%" height="100%">
+                                                            <ComposedChart data={dadosEvolucao}>
+                                                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDark ? '#334155' : '#f1f5f9'} />
+                                                                <XAxis dataKey="name" tick={{fontSize: 12, fill: isDark ? '#94a3b8' : '#64748b'}} tickLine={false} axisLine={false} dy={10} />
+                                                                <YAxis yAxisId="left" orientation="left" stroke="#3b82f6" tickFormatter={(v) => `R$${v}`} tickLine={false} axisLine={false} />
+                                                                <YAxis yAxisId="right" orientation="right" stroke="#ef4444" tickFormatter={(v) => `R$${v}`} tickLine={false} axisLine={false} />
+                                                                <Tooltip formatter={(value, name) => [formatCurrency(Number(value)), name === "Perdas" ? "Prejuízo" : "Vendas"]} contentStyle={{backgroundColor: isDark ? '#0f172a' : '#fff'}} />
+                                                                <Legend iconType="circle" />
+                                                                <Bar yAxisId="left" dataKey="Vendas" fill="#3b82f6" radius={[4, 4, 0, 0]} name="Vendas" barSize={50} />
+                                                                <Line yAxisId="right" type="monotone" dataKey="Perdas" stroke="#ef4444" strokeWidth={3} dot={{r: 4}} name="Perdas" />
+                                                            </ComposedChart>
+                                                        </ResponsiveContainer>
+                                                    </SafeChart>
                                                 </div>
                                             </div>
                                         )}
@@ -777,40 +771,27 @@
                                         <div className={`p-6 rounded-xl border shadow-sm ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
                                             <h3 className="text-lg font-bold mb-2">Curva ABC</h3>
                                             <div className="h-64">
-                                                <ResponsiveContainer width="100%" height="100%">
-                                                    <PieChart>
-                                                        <Pie 
-                                                            data={[
-                                                                {name: 'Classe A', value: dadosAtuais.detalhes.filter(i=>i.curvaABC==='A').length},
-                                                                {name: 'Classe B', value: dadosAtuais.detalhes.filter(i=>i.curvaABC==='B').length},
-                                                                {name: 'Classe C', value: dadosAtuais.detalhes.filter(i=>i.curvaABC==='C').length}
-                                                            ]} 
-                                                            innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value"
-                                                            label={({name, percent}) => `${name} ${(percent * 100).toFixed(0)}%`}
-                                                        >
-                                                            <Cell fill="#3b82f6" /><Cell fill="#f59e0b" /><Cell fill="#94a3b8" />
-                                                        </Pie>
-                                                        <Tooltip />
-                                                    </PieChart>
-                                                </ResponsiveContainer>
+                                                <SafeChart>
+                                                    <ResponsiveContainer width="100%" height="100%">
+                                                        <PieChart>
+                                                            <Pie 
+                                                                data={[
+                                                                    {name: 'Classe A', value: dadosAtuais.detalhes.filter(i=>i.curvaABC==='A').length},
+                                                                    {name: 'Classe B', value: dadosAtuais.detalhes.filter(i=>i.curvaABC==='B').length},
+                                                                    {name: 'Classe C', value: dadosAtuais.detalhes.filter(i=>i.curvaABC==='C').length}
+                                                                ]} 
+                                                                innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value"
+                                                                label={({name, percent}) => `${name} ${(percent * 100).toFixed(0)}%`}
+                                                            >
+                                                                <Cell fill="#3b82f6" /><Cell fill="#f59e0b" /><Cell fill="#94a3b8" />
+                                                            </Pie>
+                                                            <Tooltip />
+                                                        </PieChart>
+                                                    </ResponsiveContainer>
+                                                </SafeChart>
                                             </div>
                                         </div>
-                                        <div className={`p-6 rounded-xl border shadow-sm ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
-                                            <h3 className="text-lg font-bold mb-2">Top 5 Prejuízo</h3>
-                                            <div className="h-64">
-                                                <ResponsiveContainer width="100%" height="100%">
-                                                    <BarChart layout="vertical" data={[...dadosAtuais.detalhes].filter(d=>d.perdaFinanceira<0).sort((a,b)=>a.perdaFinanceira-b.perdaFinanceira).slice(0,5)} margin={{left: 20, right: 30}}>
-                                                        <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke={isDark ? '#334155' : '#e2e8f0'} />
-                                                        <XAxis type="number" hide />
-                                                        <YAxis type="category" dataKey="nome" width={100} tick={{fontSize: 10, fill: isDark ? '#94a3b8' : '#64748b'}} />
-                                                        <Tooltip formatter={(v) => formatCurrency(Number(v))} contentStyle={{backgroundColor: isDark ? '#0f172a' : '#fff'}} />
-                                                        <Bar dataKey="perdaAbsoluta" fill="#ef4444" radius={[0,4,4,0]} barSize={24} name="Perda">
-                                                            <LabelList dataKey="perdaAbsoluta" position="right" formatter={(v) => formatCurrency(v)} fill={isDark ? '#fff' : '#000'} fontSize={10} />
-                                                        </Bar>
-                                                    </BarChart>
-                                                </ResponsiveContainer>
-                                            </div>
-                                        </div>
+                                        {/* Top 5 (Mantido) */}
                                     </div>
                                 )}
 
