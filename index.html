@@ -6,20 +6,23 @@
     <title>Dashboard Estoque Caratininga</title>
     
     <!-- React & ReactDOM -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    
+    <!-- Prop-Types (Dependência) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prop-types/15.8.1/prop-types.min.js"></script>
+    
+    <!-- Recharts (Versão Estável) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/recharts/2.10.3/Recharts.min.js"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@0.263.1"></script>
     
     <!-- Babel para JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Recharts (Gráficos) -->
-    <script src="https://unpkg.com/recharts/umd/Recharts.js"></script>
-    
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
     
     <style>
         body { font-family: 'Inter', sans-serif; }
@@ -37,16 +40,58 @@
 
     <script type="text/babel">
         const { useState, useMemo, useEffect } = React;
+        
+        // --- CORREÇÃO DE SEGURANÇA PARA RECHARTS ---
+        // Se a biblioteca não carregar, cria componentes vazios para não travar o app
+        const RechartsObj = window.Recharts || {
+            BarChart: () => null, Bar: () => null, XAxis: () => null, YAxis: () => null, 
+            CartesianGrid: () => null, Tooltip: () => null, Legend: () => null, 
+            ResponsiveContainer: ({children}) => <div>{children}</div>, PieChart: () => null, 
+            Pie: () => null, Cell: () => null, ComposedChart: () => null, Line: () => null, 
+            LabelList: () => null
+        };
+        
         const { 
             BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
             PieChart, Pie, Cell, ComposedChart, Line, LabelList
-        } = Recharts;
+        } = RechartsObj;
+
+        // --- ADAPTADOR DE ÍCONES LUCIDE PARA REACT ---
+        const createLucideIcon = (iconName, iconDef) => {
+            if (!iconDef) return null;
+            return ({ color, size, className, ...props }) => {
+                const [tag, attrs, children] = iconDef;
+                const childElements = (children || []).map(([childTag, childAttrs], index) => 
+                    React.createElement(childTag, { ...childAttrs, key: index })
+                );
+                return React.createElement(tag, {
+                    ...attrs,
+                    ...props,
+                    width: size || 24,
+                    height: size || 24,
+                    stroke: color || 'currentColor',
+                    className: `lucide lucide-${iconName} ${className || ''}`.trim(),
+                }, ...childElements);
+            };
+        };
+
+        const LucideObj = window.lucide || {};
+        const LucideIcons = Object.keys(LucideObj.icons || {}).reduce((acc, key) => {
+            acc[key] = createLucideIcon(key, LucideObj.icons[key]);
+            return acc;
+        }, {});
+
+        // Fallback para ícones
+        const IconFallback = () => null;
         const { 
-            TrendingDown, Calendar, AlertCircle, CheckCircle, TrendingUp, 
-            LayoutGrid, Table, History, MapPin, Building2, Lock,
-            Truck, Info, DollarSign, Activity, ShoppingCart, PackageX, BarChart3,
-            Moon, Sun, Filter
-        } = lucide;
+            TrendingDown = IconFallback, Calendar = IconFallback, AlertCircle = IconFallback, 
+            CheckCircle = IconFallback, TrendingUp = IconFallback, LayoutGrid = IconFallback, 
+            Table = IconFallback, History = IconFallback, MapPin = IconFallback, 
+            Building2 = IconFallback, Lock = IconFallback, Truck = IconFallback, 
+            Info = IconFallback, DollarSign = IconFallback, Activity = IconFallback, 
+            ShoppingCart = IconFallback, PackageX = IconFallback, BarChart3 = IconFallback, 
+            Moon = IconFallback, Sun = IconFallback, Filter = IconFallback
+        } = LucideIcons;
 
         // --- UTILITÁRIOS ---
         const formatCurrency = (val) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
@@ -105,7 +150,6 @@
 
         // --- LÓGICA DE DADOS (DATA FETCHING) ---
         
-        // Mapeamento das pastas no GitHub
         const FILIAIS_CONFIG = {
             "GRACA": { nome: "Graça (Matriz)", path: "graca" },
             "MUCAMBO": { nome: "Mucambo (Filial)", path: "mucambo" },
@@ -119,7 +163,6 @@
             const [loading, setLoading] = useState(true);
             const [error, setError] = useState(null);
 
-            // 1. Carregar Catálogo (apenas uma vez)
             useEffect(() => {
                 fetch('data/catalogo.json')
                     .then(res => res.json())
@@ -127,7 +170,6 @@
                     .catch(err => console.error("Erro ao carregar catálogo:", err));
             }, []);
 
-            // 2. Carregar Dados da Unidade
             useEffect(() => {
                 if (!catalogo) return;
 
@@ -137,7 +179,6 @@
                     
                     try {
                         if (unidadeSelecionada === 'TODAS') {
-                            // Carrega tudo de todas as filiais para consolidar
                             const promises = Object.keys(FILIAIS_CONFIG).map(async (key) => {
                                 const config = FILIAIS_CONFIG[key];
                                 const [contagens, vendas, entradas] = await Promise.all([
@@ -148,7 +189,6 @@
                                 
                                 const unidadeDados = { contagens, vendas, entradas };
                                 const ultimoPeriodo = contagens.length - 1;
-                                // Calcula KPIs para o último período desta filial
                                 const kpis = calcularKPIsUnidade(unidadeDados, ultimoPeriodo, categoriaFilter, key, catalogo);
                                 
                                 return {
@@ -162,7 +202,6 @@
                             setDados({ tipo: 'CONSOLIDADO', filiais: resultados });
 
                         } else {
-                            // Carrega apenas a unidade selecionada
                             const config = FILIAIS_CONFIG[unidadeSelecionada];
                             const [contagens, vendas, entradas] = await Promise.all([
                                 fetch(`data/${config.path}/contagens.json`).then(r => r.json()),
@@ -202,7 +241,6 @@
         const getPrecosFilial = (produto, nomeFilial) => {
             if (!produto || !produto.filiais) return { custo: 0, venda: 0 };
             let dados = produto.filiais[nomeFilial];
-            // Fallback para Matriz se não tiver preço específico
             if (!dados || dados.custo === 0) dados = produto.filiais["GRACA"];
             if (!dados) return { custo: 0, venda: 0 };
             return { custo: dados.custo, venda: dados.preco_venda };
@@ -215,9 +253,7 @@
             const anterior = dadosUnidade.contagens[indicePeriodo - 1];
             const catalogo = getCatalogoPorData(catalogoFull, atual.data);
             
-            // Chave de período: DATA_ANTERIOR_DATA_ATUAL
             const keyPeriodo = `${anterior.data}_${atual.data}`;
-            
             const vendas = dadosUnidade.vendas[keyPeriodo] || {};
             const entradas = dadosUnidade.entradas[keyPeriodo] || {};
 
@@ -244,7 +280,6 @@
                 const diferenca = qtdFinal - teorico;
                 
                 let impactoFinanceiro = 0;
-                // Considera perda apenas se diferença negativa
                 if (diferenca < 0) {
                     impactoFinanceiro = Math.abs(diferenca * custo);
                     perdaFinanceira += impactoFinanceiro;
@@ -258,7 +293,6 @@
                 margemTotal += (receitaItem - custoItemTotal);
                 valorEstoqueAtual += (qtdFinal * custo);
 
-                // Giro e Sugestão
                 const diasNoPeriodo = 7; 
                 const vendaDiaria = qtdVendida / diasNoPeriodo;
                 let diasCobertura = 0;
@@ -282,7 +316,6 @@
                 if (venda > 20) curvaABC = 'A';
                 else if (venda > 8) curvaABC = 'B';
 
-                // Status Item
                 let status = 'ok';
                 if (diferenca < 0) status = 'atencao';
                 if (impactoFinanceiro > 20) status = 'critico';
@@ -295,11 +328,11 @@
                     inicial: qtdInicial,
                     vendas: qtdVendida,
                     entrada: qtdEntrada,
-                    teorico,
+                    teorico: parseFloat(teorico.toFixed(2)),
                     final: qtdFinal,
-                    diferenca,
-                    perdaFinanceira: diferenca < 0 ? diferenca * custo : 0, // Negativo
-                    perdaAbsoluta: diferenca < 0 ? Math.abs(diferenca * custo) : 0, // Positivo (Visual)
+                    diferenca: parseFloat(diferenca.toFixed(2)),
+                    perdaFinanceira: diferenca < 0 ? diferenca * custo : 0, 
+                    perdaAbsoluta: diferenca < 0 ? Math.abs(diferenca * custo) : 0,
                     status,
                     diasCobertura,
                     statusGiro,
@@ -335,7 +368,6 @@
             const [periodoSelecionado, setPeriodoSelecionado] = useState(0);
             const [activeTab, setActiveTab] = useState('visao_geral');
             
-            // Tema
             const [theme, setTheme] = useState('system');
             const [isDark, setIsDark] = useState(false);
             useEffect(() => {
@@ -343,10 +375,8 @@
                 setIsDark(theme === 'system' ? check() : theme === 'dark');
             }, [theme]);
 
-            // Hook de Dados Reais
             const { dadosBI, loading, error, catalogoFull } = useDadosReais(unidadeAtual, categoriaSelecionada);
 
-            // Categorias Disponíveis
             const categoriasDisponiveis = useMemo(() => {
                 if (!catalogoFull) return ["TODAS"];
                 const cats = new Set();
@@ -356,7 +386,6 @@
                 return ["TODAS", ...Array.from(cats)];
             }, [catalogoFull]);
 
-            // Dados Computados
             const dadosAtuais = useMemo(() => {
                 if (dadosBI?.tipo === 'INDIVIDUAL' && dadosBI.unidade && catalogoFull) {
                     const maxIdx = dadosBI.unidade.contagens.length - 1;
@@ -375,7 +404,7 @@
                             dados.push({
                                 name: calculo.periodoLabel,
                                 Vendas: calculo.vendaFinanceira,
-                                Perdas: calculo.perdaFinanceira, // Total já calculado
+                                Perdas: calculo.perdaFinanceira, 
                                 Percentual: parseFloat(calculo.percentualPerda.toFixed(1))
                             });
                         }
@@ -390,7 +419,6 @@
                     const datas = dadosBI.filiais.map(f => f.dataRef).sort();
                     const ultimaData = datas.length ? datas[datas.length - 1] : 'N/A';
                     
-                    // Filtrar filiais com dados válidos
                     const filiaisValidas = dadosBI.filiais.filter(f => f.dados);
 
                     return {
@@ -429,7 +457,17 @@
                 }, { inicial: 0, entrada: 0, vendas: 0, teorico: 0, final: 0, diferenca: 0, perdaFinanceira: 0, margemContrib: 0 });
             }, [dadosAtuais]);
 
-            // --- RENDER ---
+            // VERIFICAÇÃO DE SEGURANÇA PARA RECHARTS
+            // Se o objeto de fallback estiver ativo, mostra erro
+            if (!window.Recharts) {
+                return (
+                    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+                        <div className="bg-white p-8 rounded-2xl shadow-2xl max-w-md text-center text-red-600 font-bold">
+                            Erro: A biblioteca de gráficos não carregou. Verifique sua conexão ou tente recarregar.
+                        </div>
+                    </div>
+                );
+            }
 
             if (!isAuthenticated) return <LoginScreen onLogin={() => setIsAuthenticated(true)} />;
 
@@ -609,6 +647,48 @@
                                             <div className={`p-5 rounded-xl border shadow-sm ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
                                                 <div className="flex justify-between items-start mb-2"><div className="text-xs font-bold uppercase opacity-60">Acuracidade</div><CheckCircle size={16} className="text-purple-500" /></div>
                                                 <div className={`text-2xl font-black ${isDark ? 'text-slate-100' : 'text-slate-800'}`}>{dadosAtuais.acuracidade.toFixed(1)}%</div>
+                                            </div>
+                                        </div>
+
+                                        {/* DEAD STOCK & SUGGESTION */}
+                                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                                            <div className={`p-6 rounded-xl border shadow-sm ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
+                                                <h3 className="text-sm font-bold uppercase mb-4 flex items-center gap-2"><PackageX size={16} /> Estoque Morto (Sem vendas)</h3>
+                                                <div className="space-y-3 overflow-auto max-h-64">
+                                                    {dadosAtuais.detalhes.filter(i => i.statusGiro === 'morto').length === 0 ? (
+                                                        <div className="text-sm opacity-60 py-4 text-center">Nenhum item parado detectado.</div>
+                                                    ) : (
+                                                        dadosAtuais.detalhes.filter(i => i.statusGiro === 'morto').map(item => (
+                                                            <div key={item.id} className={`flex justify-between items-center p-3 rounded-lg border ${isDark ? 'bg-slate-700 border-slate-600' : 'bg-slate-50 border-slate-100'}`}>
+                                                                <div><div className="font-bold text-sm">{item.nome}</div><div className="text-xs opacity-60">{item.final} unidades paradas</div></div>
+                                                                <div className="text-right"><div className="text-xs font-bold opacity-60">Custo Parado</div><div className="font-bold">{formatCurrency(item.final * item.custo)}</div></div>
+                                                            </div>
+                                                        ))
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <div className={`p-6 rounded-xl border shadow-sm ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
+                                                <h3 className="text-sm font-bold uppercase mb-4 flex items-center gap-2"><Truck size={16} /> Sugestão de Reposição</h3>
+                                                <div className="overflow-auto max-h-64">
+                                                    <table className="w-full text-sm text-left">
+                                                        <thead className={`text-xs uppercase ${isDark ? 'bg-slate-700 text-slate-400' : 'bg-slate-50 text-slate-400'}`}>
+                                                            <tr><th className="px-3 py-2">Produto</th><th className="px-3 py-2 text-center">Atual</th><th className="px-3 py-2 text-right">Comprar</th></tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {dadosAtuais.detalhes.filter(i => i.sugestaoCompra > 0).length === 0 ? (
+                                                                <tr><td colSpan={3} className="p-4 text-center opacity-60">Estoque suficiente.</td></tr>
+                                                            ) : (
+                                                                dadosAtuais.detalhes.filter(i => i.sugestaoCompra > 0).map(item => (
+                                                                    <tr key={item.id} className={`border-b ${isDark ? 'border-slate-700' : 'border-slate-100'}`}>
+                                                                        <td className="px-3 py-2 font-medium">{item.nome}</td>
+                                                                        <td className="px-3 py-2 text-center text-red-500 font-bold">{item.final}</td>
+                                                                        <td className="px-3 py-2 text-right font-bold text-blue-600">+{item.sugestaoCompra}</td>
+                                                                    </tr>
+                                                                ))
+                                                            )}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
                                             </div>
                                         </div>
 
