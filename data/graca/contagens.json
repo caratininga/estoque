@@ -1,0 +1,31 @@
+[
+  {
+    "id": "inv_2023_12_06",
+    "data": "2023-12-06",
+    "responsavel": "Gerente Matriz",
+    "itens": {
+      "1": 260,
+      "2": 450,
+      "3": 75,
+      "23": 580,
+      "53": 700,
+      "58": 100
+    }
+  },
+  {
+    "id": "inv_2023_12_13",
+    "data": "2023-12-13",
+    "responsavel": "Gerente Matriz",
+    "itens": {
+      "1": 256.9,
+      "2": 448,
+      "3": 72,
+      "4": 0,
+      "5": 134.38,
+      "23": 5498.61,
+      "53": 6506.25,
+      "58": 2126.47
+    },
+    "observacoes": "Inventário geral de Dezembro realizado com sucesso."
+  }
+]
