@@ -513,32 +513,32 @@
                             <button class="no-print" onclick="window.print()" style="padding: 8px 16px; font-size: 14px; cursor: pointer; font-weight: bold;">IMPRIMIR</button>
                         </div>
                         
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th style="width: 40%">Produto</th>
-                                    <th>Local 1</th>
-                                    <th>Local 2</th>
-                                    <th>Local 3</th>
-                                    <th>Local 4</th>
-                                    <th style="background-color: #e0e0e0; font-weight: bold; width: 10%">TOTAL</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${categoriasOrdenadas.map(categoria => `
-                                    <tr>
-                                        <td colspan="6" class="category-header">${categoria}</td>
-                                    </tr>
-                                    ${produtosPorCategoria[categoria].sort((a,b) => a.nome.localeCompare(b.nome)).map(p => `
+                        ${categoriasOrdenadas.map(categoria => `
+                            <div style="page-break-inside: avoid; margin-bottom: 20px;">
+                                <div style="background-color: #ddd; font-weight: bold; text-align: center; font-size: 14px; padding: 8px; text-transform: uppercase; border: 1px solid #ccc;">${categoria}</div>
+                                <table>
+                                    <thead>
                                         <tr>
-                                            <td>${p.nome}</td>
-                                            <td></td><td></td><td></td><td></td>
-                                            <td style="background-color: #f9f9f9"></td>
+                                            <th style="width: 40%">Produto</th>
+                                            <th>Local 1</th>
+                                            <th>Local 2</th>
+                                            <th>Local 3</th>
+                                            <th>Local 4</th>
+                                            <th style="background-color: #e0e0e0; font-weight: bold; width: 10%">TOTAL</th>
                                         </tr>
-                                    `).join('')}
-                                `).join('')}
-                            </tbody>
-                        </table>
+                                    </thead>
+                                    <tbody>
+                                        ${produtosPorCategoria[categoria].sort((a,b) => a.nome.localeCompare(b.nome)).map(p => `
+                                            <tr>
+                                                <td>${p.nome}</td>
+                                                <td></td><td></td><td></td><td></td>
+                                                <td style="background-color: #f9f9f9"></td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        `).join('')}
                     </body>
                     </html>
                 `;
