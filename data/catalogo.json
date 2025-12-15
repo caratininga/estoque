@@ -579,7 +579,18 @@
         "FRECHEIRINHA": { "custo": 5.87, "preco_venda": 10.00 },
         "TIANGUA": { "custo": 0.00, "preco_venda": 10.00 }
       }
+    },
+    "1045": {
+      "nome": "BUDWEISER LN ZERO 330ML",
+      "categoria": "CERVEJAS ZERO ALCOOL",
+      "filiais": {
+        "GRACA": { "custo": 0.00, "preco_venda": 7.50 },
+        "MUCAMBO": { "custo": 0.00, "preco_venda": 7.50 },
+        "FRECHEIRINHA": { "custo": 0.00, "preco_venda": 0.00 },
+        "TIANGUA": { "custo": 0.00, "preco_venda": 0.00 }
+      }
     }
   }
 
 }
+
