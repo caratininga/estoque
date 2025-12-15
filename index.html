@@ -85,7 +85,8 @@
             AlertCircle: (p) => <IconBase {...p}><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></IconBase>,
             ClipboardList: (p) => <IconBase {...p}><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></IconBase>,
             Save: (p) => <IconBase {...p}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></IconBase>,
-            Download: (p) => <IconBase {...p}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></IconBase>
+            Download: (p) => <IconBase {...p}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></IconBase>,
+            AlertOctagon: (p) => <IconBase {...p}><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></IconBase>
         };
 
         // --- UTILITÁRIOS ---
@@ -142,15 +143,15 @@
             );
         };
 
-        const EmptyState = ({ message, isDark }) => (
+        const EmptyState = ({ message, isDark, isUsingBackup }) => (
             <div className={`flex flex-col items-center justify-center h-96 p-8 text-center rounded-xl border-2 border-dashed ${isDark ? 'border-slate-700 bg-slate-800/50' : 'border-slate-300 bg-slate-50'}`}>
-                <div className={`p-4 rounded-full mb-4 ${isDark ? 'bg-slate-700 text-slate-400' : 'bg-slate-200 text-slate-500'}`}>
-                    <Icons.FileX size={48} />
+                <div className={`p-4 rounded-full mb-4 ${isUsingBackup ? 'bg-amber-100 text-amber-500' : (isDark ? 'bg-slate-700 text-slate-400' : 'bg-slate-200 text-slate-500')}`}>
+                    {isUsingBackup ? <Icons.AlertOctagon size={48} /> : <Icons.FileX size={48} />}
                 </div>
-                <h3 className={`text-xl font-bold mb-2 ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>Nenhum dado encontrado</h3>
+                <h3 className={`text-xl font-bold mb-2 ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>{isUsingBackup ? "Usando Dados de Backup" : "Nenhum dado encontrado"}</h3>
                 <p className={`max-w-md mb-6 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{message}</p>
-                <div className={`text-xs p-3 rounded text-left font-mono ${isDark ? 'bg-slate-900 text-slate-400' : 'bg-slate-200 text-slate-600'}`}>
-                    Dica: Verifique a estrutura da pasta 'data/' no repositório.
+                <div className={`text-xs p-3 rounded text-left font-mono ${isUsingBackup ? 'bg-amber-50 text-amber-800 border border-amber-200' : (isDark ? 'bg-slate-900 text-slate-400' : 'bg-slate-200 text-slate-600')}`}>
+                    {isUsingBackup ? "AVISO: O sistema carregou dados de exemplo porque não conseguiu acessar os arquivos JSON. Verifique se os arquivos estão na pasta correta." : "Dica: Verifique a estrutura da pasta 'data/' no repositório."}
                 </div>
             </div>
         );
@@ -273,11 +274,15 @@
             const [catalogo, setCatalogo] = useState(null);
             const [loading, setLoading] = useState(true);
             const [error, setError] = useState(null);
+            const [usingBackup, setUsingBackup] = useState(false);
 
             const safeFetch = async (url) => {
+                const timestamp = new Date().getTime(); // Anti-cache
+                const urlWithTs = `${url}?t=${timestamp}`;
+                
                 try {
-                    const res = await fetch(url);
-                    if (!res.ok) throw new Error("Erro na resposta");
+                    const res = await fetch(urlWithTs);
+                    if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
                     return await res.json();
                 } catch (e) {
                     console.warn(`Fetch falhou para: ${url}`, e);
@@ -285,13 +290,47 @@
                 }
             };
 
+            // Dados de Backup para evitar tela de erro
+            const MOCK_CATALOGO = {
+                "2023-12-13": {
+                    "1": { "nome": "AGUA SEM GAS 500ML", "categoria": "AGUAS", "filiais": { "GRACA": { "custo": 1.17, "preco_venda": 3.00 }, "MUCAMBO": { "custo": 1.98, "preco_venda": 2.99 }, "FRECHEIRINHA": { "custo": 1.60, "preco_venda": 3.00 }, "TIANGUA": { "custo": 1.31, "preco_venda": 3.00 } } },
+                    "23": { "nome": "COCA-COLA 2L", "categoria": "REFRIGERANTES", "filiais": { "GRACA": { "custo": 9.56, "preco_venda": 15.99 }, "MUCAMBO": { "custo": 10.28, "preco_venda": 15.99 }, "FRECHEIRINHA": { "custo": 9.63, "preco_venda": 15.99 }, "TIANGUA": { "custo": 0.00, "preco_venda": 15.99 } } },
+                    "53": { "nome": "HEINEKEN 600ML", "categoria": "CERVEJAS", "filiais": { "GRACA": { "custo": 9.38, "preco_venda": 16.00 }, "MUCAMBO": { "custo": 9.38, "preco_venda": 15.99 }, "FRECHEIRINHA": { "custo": 9.38, "preco_venda": 16.99 }, "TIANGUA": { "custo": 9.58, "preco_venda": 16.99 } } },
+                    "58": { "nome": "SKOL 600ML", "categoria": "CERVEJAS", "filiais": { "GRACA": { "custo": 6.56, "preco_venda": 10.00 }, "MUCAMBO": { "custo": 6.56, "preco_venda": 9.99 }, "FRECHEIRINHA": { "custo": 6.08, "preco_venda": 10.99 }, "TIANGUA": { "custo": 6.08, "preco_venda": 10.99 } } }
+                }
+            };
+            const MOCK_DADOS_UNIDADES = {
+                "GRACA": {
+                    contagens: [{ id: "g0", data: "2023-12-06", itens: { "1": 260, "23": 580, "53": 700, "58": 100 } }, { id: "g1", data: "2023-12-13", itens: { "1": 256.9, "23": 5498.61, "53": 6506.25, "58": 2126.47 }, observacoes: "Inventário simulado." }],
+                    vendas: { "2023-12-06_2023-12-13": { "1": 10, "23": 50, "53": 200, "58": 50 } },
+                    entradas: { "2023-12-06_2023-12-13": { "1": 6.9, "23": 4968.61, "58": 2076.47 } }
+                },
+                "MUCAMBO": {
+                    contagens: [{ id: "m0", data: "2023-12-06", itens: { "1": 40, "23": 130, "53": 60, "58": 1300 } }, { id: "m1", data: "2023-12-13", itens: { "1": 30.4, "23": 128, "53": 53, "58": 1279 } }],
+                    vendas: { "2023-12-06_2023-12-13": { "1": 10, "23": 5, "53": 7, "58": 21 } },
+                    entradas: { "2023-12-06_2023-12-13": { "1": 0.4, "23": 3, "58": 0 } }
+                },
+                "FRECHEIRINHA": {
+                    contagens: [{ id: "f0", data: "2023-12-06", itens: { "1": 1000, "23": 350, "53": 50, "58": 100 } }, { id: "f1", data: "2023-12-13", itens: { "1": 997.5, "23": 334, "53": 12, "58": 45 } }],
+                    vendas: { "2023-12-06_2023-12-13": { "1": 50, "23": 16, "53": 38, "58": 55 } },
+                    entradas: { "2023-12-06_2023-12-13": { "1": 47.5 } }
+                },
+                "TIANGUA": {
+                    contagens: [{ id: "t0", data: "2023-12-06", itens: { "1": 50, "23": 0, "53": 20, "58": 220 } }, { id: "t1", data: "2023-12-13", itens: { "1": 10, "23": 813, "53": 5, "58": 202 } }],
+                    vendas: { "2023-12-06_2023-12-13": { "1": 40, "23": 87, "53": 15, "58": 18 } },
+                    entradas: { "2023-12-06_2023-12-13": { "23": 100 } }
+                }
+            };
+
             useEffect(() => {
                 const loadCatalogo = async () => {
                     const data = await safeFetch('data/catalogo.json');
-                    if (data) setCatalogo(data);
-                    else {
-                        setLoading(false);
-                        setError("Catálogo não encontrado.");
+                    if (data) {
+                        setCatalogo(data);
+                    } else {
+                        console.warn("Usando catálogo de backup.");
+                        setCatalogo(MOCK_CATALOGO);
+                        setUsingBackup(true);
                     }
                 };
                 loadCatalogo();
@@ -308,9 +347,13 @@
                         if (unidadeSelecionada === 'TODAS') {
                             const promises = Object.keys(FILIAIS_CONFIG).map(async (key) => {
                                 const config = FILIAIS_CONFIG[key];
-                                const contagens = await safeFetch(`data/${config.path}/contagens.json`) || [];
-                                const vendas = await safeFetch(`data/${config.path}/vendas.json`) || {};
-                                const entradas = await safeFetch(`data/${config.path}/entradas.json`) || {};
+                                const mockFilial = MOCK_DADOS_UNIDADES[key] || { contagens: [], vendas: {}, entradas: {} };
+                                
+                                const [contagens, vendas, entradas] = await Promise.all([
+                                    safeFetch(`data/${config.path}/contagens.json`) || (usingBackup ? mockFilial.contagens : []),
+                                    safeFetch(`data/${config.path}/vendas.json`) || (usingBackup ? mockFilial.vendas : {}),
+                                    safeFetch(`data/${config.path}/entradas.json`) || (usingBackup ? mockFilial.entradas : {})
+                                ]);
                                 
                                 const unidadeDados = { contagens, vendas, entradas };
                                 if(!contagens || contagens.length < 2) return { nome: config.nome, dados: null };
@@ -324,22 +367,39 @@
                             const resultados = await Promise.all(promises);
                             const validos = resultados.filter(r => r.dados !== null);
                             
-                            if (validos.length === 0) throw new Error("Nenhum dado válido encontrado.");
-                            setDados({ tipo: 'CONSOLIDADO', filiais: resultados });
+                            if (validos.length === 0) {
+                                if (usingBackup) {
+                                    setDados({ tipo: 'CONSOLIDADO', filiais: resultados });
+                                } else {
+                                    throw new Error("Nenhum dado válido encontrado.");
+                                }
+                            } else {
+                                setDados({ tipo: 'CONSOLIDADO', filiais: resultados });
+                            }
 
                         } else {
                             const config = FILIAIS_CONFIG[unidadeSelecionada];
-                            const contagens = await safeFetch(`data/${config.path}/contagens.json`);
-                            const vendas = await safeFetch(`data/${config.path}/vendas.json`) || {};
-                            const entradas = await safeFetch(`data/${config.path}/entradas.json`) || {};
+                            const mockFilial = MOCK_DADOS_UNIDADES[unidadeSelecionada];
 
-                            if(!contagens || contagens.length === 0) throw new Error("Arquivo de contagens não encontrado.");
+                            const [contagens, vendas, entradas] = await Promise.all([
+                                safeFetch(`data/${config.path}/contagens.json`) || (usingBackup ? mockFilial.contagens : []),
+                                safeFetch(`data/${config.path}/vendas.json`) || (usingBackup ? mockFilial.vendas : {}),
+                                safeFetch(`data/${config.path}/entradas.json`) || (usingBackup ? mockFilial.entradas : {})
+                            ]);
 
-                            setDados({ tipo: 'INDIVIDUAL', unidade: { contagens, vendas, entradas }, key: unidadeSelecionada });
+                            if(!contagens || contagens.length === 0) {
+                                if (usingBackup) {
+                                     setDados({ tipo: 'INDIVIDUAL', unidade: { contagens: mockFilial.contagens, vendas: mockFilial.vendas, entradas: mockFilial.entradas }, key: unidadeSelecionada });
+                                } else {
+                                    throw new Error("Arquivo de contagens não encontrado.");
+                                }
+                            } else {
+                                setDados({ tipo: 'INDIVIDUAL', unidade: { contagens, vendas, entradas }, key: unidadeSelecionada });
+                            }
                         }
                     } catch (err) {
                         console.error("Erro:", err);
-                        setError("Não foi possível carregar os dados.");
+                        setError("Não foi possível carregar os dados. Verifique a conexão ou os arquivos.");
                         setDados(null);
                     } finally {
                         setLoading(false);
@@ -347,9 +407,9 @@
                 };
 
                 carregarDados();
-            }, [unidadeSelecionada, categoriaFilter, catalogo]);
+            }, [unidadeSelecionada, categoriaFilter, catalogo, usingBackup]);
 
-            return { dadosBI: dados, loading, error, catalogoFull: catalogo };
+            return { dadosBI: dados, loading, error, catalogoFull: catalogo, usingBackup };
         };
 
         // --- APP ---
@@ -381,7 +441,7 @@
                 setTheme(prev => prev === 'dark' ? 'light' : 'dark');
             };
 
-            const { dadosBI, loading, error, catalogoFull } = useDadosReais(unidadeAtual, categoriaSelecionada);
+            const { dadosBI, loading, error, catalogoFull, usingBackup } = useDadosReais(unidadeAtual, categoriaSelecionada);
 
             const categoriasDisponiveis = useMemo(() => {
                 if (!catalogoFull) return ["TODAS"];
@@ -879,26 +939,69 @@
                                                 <div className={`text-2xl font-black ${isDark ? 'text-slate-100' : 'text-slate-800'}`}>{dadosAtuais.acuracidade.toFixed(1)}%</div>
                                             </div>
                                         </div>
-                                        {/* Outros gráficos... */}
-                                        <div className={`p-6 rounded-xl border shadow-sm mb-6 ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
-                                            <h3 className="text-lg font-bold mb-6 flex items-center gap-2"><Icons.TrendingUp size={20} className="text-blue-500" /> Evolução</h3>
-                                            <div className="h-80 w-full">
-                                                <SafeChart>
-                                                    <ResponsiveContainer width="100%" height="100%">
-                                                        <ComposedChart data={dadosEvolucao}>
-                                                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDark ? '#334155' : '#f1f5f9'} />
-                                                            <XAxis dataKey="name" tick={{fontSize: 12, fill: isDark ? '#94a3b8' : '#64748b'}} tickLine={false} axisLine={false} dy={10} />
-                                                            <YAxis yAxisId="left" orientation="left" stroke="#3b82f6" tickFormatter={(v) => `R$${v}`} tickLine={false} axisLine={false} />
-                                                            <YAxis yAxisId="right" orientation="right" stroke="#ef4444" tickFormatter={(v) => `R$${v}`} tickLine={false} axisLine={false} />
-                                                            <Tooltip formatter={(value, name) => [formatCurrency(Number(value)), name === "Perdas" ? "Prejuízo" : "Vendas"]} contentStyle={{backgroundColor: isDark ? '#0f172a' : '#fff'}} />
-                                                            <Legend iconType="circle" />
-                                                            <Bar yAxisId="left" dataKey="Vendas" fill="#3b82f6" radius={[4, 4, 0, 0]} name="Vendas" barSize={50} />
-                                                            <Line yAxisId="right" type="monotone" dataKey="Perdas" stroke="#ef4444" strokeWidth={3} dot={{r: 4}} name="Perdas" />
-                                                        </ComposedChart>
-                                                    </ResponsiveContainer>
-                                                </SafeChart>
+
+                                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                                            <div className={`p-6 rounded-xl border shadow-sm ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
+                                                <h3 className="text-sm font-bold uppercase mb-4 flex items-center gap-2"><Icons.PackageX size={16} /> Estoque Morto (Sem vendas)</h3>
+                                                <div className="space-y-3 overflow-auto max-h-64">
+                                                    {dadosAtuais.detalhes.filter(i => i.statusGiro === 'morto').length === 0 ? (
+                                                        <div className="text-sm opacity-60 py-4 text-center">Nenhum item parado detectado.</div>
+                                                    ) : (
+                                                        dadosAtuais.detalhes.filter(i => i.statusGiro === 'morto').map(item => (
+                                                            <div key={item.id} className={`flex justify-between items-center p-3 rounded-lg border ${isDark ? 'bg-slate-700 border-slate-600' : 'bg-slate-50 border-slate-100'}`}>
+                                                                <div><div className="font-bold text-sm">{item.nome}</div><div className="text-xs opacity-60">{item.final} unidades paradas</div></div>
+                                                                <div className="text-right"><div className="text-xs font-bold opacity-60">Custo Parado</div><div className="font-bold">{formatCurrency(item.final * item.custo)}</div></div>
+                                                            </div>
+                                                        ))
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <div className={`p-6 rounded-xl border shadow-sm ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
+                                                <h3 className="text-sm font-bold uppercase mb-4 flex items-center gap-2"><Icons.Truck size={16} /> Sugestão de Reposição</h3>
+                                                <div className="overflow-auto max-h-64">
+                                                    <table className="w-full text-sm text-left">
+                                                        <thead className={`text-xs uppercase ${isDark ? 'bg-slate-700 text-slate-400' : 'bg-slate-50 text-slate-400'}`}>
+                                                            <tr><th className="px-3 py-2">Produto</th><th className="px-3 py-2 text-center">Atual</th><th className="px-3 py-2 text-right">Comprar</th></tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {dadosAtuais.detalhes.filter(i => i.sugestaoCompra > 0).length === 0 ? (
+                                                                <tr><td colSpan={3} className="p-4 text-center opacity-60">Estoque suficiente.</td></tr>
+                                                            ) : (
+                                                                dadosAtuais.detalhes.filter(i => i.sugestaoCompra > 0).map(item => (
+                                                                    <tr key={item.id} className={`border-b ${isDark ? 'border-slate-700' : 'border-slate-100'}`}>
+                                                                        <td className="px-3 py-2 font-medium">{item.nome}</td>
+                                                                        <td className="px-3 py-2 text-center text-red-500 font-bold">{item.final}</td>
+                                                                        <td className="px-3 py-2 text-right font-bold text-blue-600">+{item.sugestaoCompra}</td>
+                                                                    </tr>
+                                                                ))
+                                                            )}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
                                             </div>
                                         </div>
+
+                                        {chartsAvailable && (
+                                            <div className={`p-6 rounded-xl border shadow-sm mb-6 ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
+                                                <h3 className="text-lg font-bold mb-6 flex items-center gap-2"><Icons.TrendingUp size={20} className="text-blue-500" /> Evolução</h3>
+                                                <div className="h-80 w-full">
+                                                    <SafeChart>
+                                                        <ResponsiveContainer width="100%" height="100%">
+                                                            <ComposedChart data={dadosEvolucao}>
+                                                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDark ? '#334155' : '#f1f5f9'} />
+                                                                <XAxis dataKey="name" tick={{fontSize: 12, fill: isDark ? '#94a3b8' : '#64748b'}} tickLine={false} axisLine={false} dy={10} />
+                                                                <YAxis yAxisId="left" orientation="left" stroke="#3b82f6" tickFormatter={(v) => `R$${v}`} tickLine={false} axisLine={false} />
+                                                                <YAxis yAxisId="right" orientation="right" stroke="#ef4444" tickFormatter={(v) => `R$${v}`} tickLine={false} axisLine={false} />
+                                                                <Tooltip formatter={(value, name) => [formatCurrency(Number(value)), name === "Perdas" ? "Prejuízo" : "Vendas"]} contentStyle={{backgroundColor: isDark ? '#0f172a' : '#fff'}} />
+                                                                <Legend iconType="circle" />
+                                                                <Bar yAxisId="left" dataKey="Vendas" fill="#3b82f6" radius={[4, 4, 0, 0]} name="Vendas" barSize={50} />
+                                                                <Line yAxisId="right" type="monotone" dataKey="Perdas" stroke="#ef4444" strokeWidth={3} dot={{r: 4}} name="Perdas" />
+                                                            </ComposedChart>
+                                                        </ResponsiveContainer>
+                                                    </SafeChart>
+                                                </div>
+                                            </div>
+                                        )}
                                     </>
                                 )}
 
