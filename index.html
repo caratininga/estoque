@@ -32,6 +32,16 @@
         
         .sort-icon { transition: transform 0.2s; }
         .sort-asc { transform: rotate(180deg); }
+        
+        /* Estilos de Impressão */
+        @media print {
+            body * { visibility: hidden; }
+            .print-area, .print-area * { visibility: visible; }
+            .print-area { position: absolute; left: 0; top: 0; width: 100%; color: black !important; background: white !important; }
+            .no-print { display: none !important; }
+            thead { display: table-header-group; }
+            tr { page-break-inside: avoid; }
+        }
     </style>
 </head>
 <body>
@@ -197,6 +207,17 @@
             let margemTotal = 0;
             let itensDetalhados = [];
 
+            // Agrupa vendas totais e custos totais para a curva ABC
+            let totalVendasPeriodo = 0;
+             Object.keys(catalogo).forEach(id => {
+                 const prod = catalogo[id];
+                 const { venda } = getPrecosFilial(prod, nomeFilialKey);
+                 const qtdVendida = vendas[id] || 0;
+                 totalVendasPeriodo += (qtdVendida * venda);
+            });
+
+            const itensABC = [];
+
             Object.keys(catalogo).forEach(id => {
                 const prod = catalogo[id];
                 if (categoriaFilter !== 'TODAS' && prod.categoria !== categoriaFilter) return;
@@ -239,23 +260,41 @@
                 let sugestaoCompra = 0;
                 if (diasCobertura < 7 && vendaDiaria > 0) sugestaoCompra = Math.ceil((14 * vendaDiaria) - qtdFinal);
 
-                let curvaABC = 'C';
-                if (venda > 20) curvaABC = 'A';
-                else if (venda > 8) curvaABC = 'B';
-
                 let status = 'ok';
                 if (diferenca < 0) status = 'atencao';
                 if (impactoFinanceiro > 20) status = 'critico';
+                
+                itensABC.push({id, receitaItem});
 
                 itensDetalhados.push({
-                    id, nome: prod.nome, categoria: prod.categoria, custo,
+                    id, nome: prod.nome, categoria: prod.categoria, custo, venda,
                     inicial: qtdInicial, vendas: qtdVendida, entrada: qtdEntrada,
                     teorico: parseFloat(teorico.toFixed(2)), final: qtdFinal, diferenca: parseFloat(diferenca.toFixed(2)),
                     perdaFinanceira: diferenca < 0 ? diferenca * custo : 0, 
                     perdaAbsoluta: diferenca < 0 ? Math.abs(diferenca * custo) : 0,
-                    status, diasCobertura, statusGiro, sugestaoCompra, margemContrib: receitaItem - custoItemTotal, curvaABC
+                    status, diasCobertura, statusGiro, sugestaoCompra, margemContrib: receitaItem - custoItemTotal,
+                    curvaABC: 'C' // Placeholder
                 });
             });
+
+            // Cálculo da Curva ABC baseada em Valor (Receita)
+            itensABC.sort((a, b) => b.receitaItem - a.receitaItem);
+            let acumulado = 0;
+            const abcMap = {};
+            itensABC.forEach(item => {
+                acumulado += item.receitaItem;
+                const percent = totalVendasPeriodo > 0 ? acumulado / totalVendasPeriodo : 0;
+                if (percent <= 0.80) abcMap[item.id] = 'A';
+                else if (percent <= 0.95) abcMap[item.id] = 'B';
+                else abcMap[item.id] = 'C';
+            });
+            
+            // Atualiza Curva ABC nos itens detalhados
+             itensDetalhados.forEach(item => {
+                if (abcMap[item.id]) item.curvaABC = abcMap[item.id];
+                // Fallback para itens sem venda: C
+             });
+
 
             const itensCorretos = itensDetalhados.filter(i => i.diferenca === 0).length;
             const acuracidade = (itensDetalhados.length > 0) ? (itensCorretos / itensDetalhados.length) * 100 : 100;
@@ -846,7 +885,7 @@
                          {loading && <div className="text-center py-20 opacity-50 animate-pulse">Carregando dados...</div>}
                         
                         {!loading && (!dadosBI || (unidadeAtual === 'TODAS' && !dadosConsolidados) || (unidadeAtual !== 'TODAS' && !dadosAtuais)) && (
-                            <EmptyState message={error || "Não foi possível carregar os dados de controle de estoque."} isDark={isDark} />
+                            <EmptyState message={error || "Não foi possível carregar os dados de controle de estoque."} isDark={isDark} isUsingBackup={usingBackup} />
                         )}
 
                         {/* CONTEÚDO REAL */}
@@ -950,7 +989,16 @@
                                                         dadosAtuais.detalhes.filter(i => i.statusGiro === 'morto').map(item => (
                                                             <div key={item.id} className={`flex justify-between items-center p-3 rounded-lg border ${isDark ? 'bg-slate-700 border-slate-600' : 'bg-slate-50 border-slate-100'}`}>
                                                                 <div><div className="font-bold text-sm">{item.nome}</div><div className="text-xs opacity-60">{item.final} unidades paradas</div></div>
-                                                                <div className="text-right"><div className="text-xs font-bold opacity-60">Custo Parado</div><div className="font-bold">{formatCurrency(item.final * item.custo)}</div></div>
+                                                                <div className="text-right flex flex-col gap-1">
+                                                                     <div>
+                                                                        <div className="text-[10px] font-bold opacity-60 uppercase">Custo (Unit: {formatCurrency(item.custo)})</div>
+                                                                        <div className="font-bold text-red-400">{formatCurrency(item.final * item.custo)}</div>
+                                                                    </div>
+                                                                    <div>
+                                                                        <div className="text-[10px] font-bold opacity-60 uppercase">Venda (Unit: {formatCurrency(item.venda)})</div>
+                                                                        <div className="font-bold text-blue-400">{formatCurrency(item.final * item.venda)}</div>
+                                                                    </div>
+                                                                </div>
                                                             </div>
                                                         ))
                                                     )}
@@ -1007,8 +1055,7 @@
 
                                 {activeTab === 'graficos' && chartsAvailable && (
                                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                        {/* Gráficos de Pizza e Barras */}
-                                         <div className={`p-6 rounded-xl border shadow-sm ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
+                                        <div className={`p-6 rounded-xl border shadow-sm ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
                                             <h3 className="text-lg font-bold mb-2">Curva ABC</h3>
                                             <div className="h-64">
                                                 <SafeChart>
@@ -1031,7 +1078,7 @@
                                                 </SafeChart>
                                             </div>
                                         </div>
-                                         <div className={`p-6 rounded-xl border shadow-sm ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
+                                        <div className={`p-6 rounded-xl border shadow-sm ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
                                             <h3 className="text-lg font-bold mb-2">Top 5 Prejuízo</h3>
                                             <div className="h-64">
                                                 <SafeChart>
