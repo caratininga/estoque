@@ -562,7 +562,7 @@
     },
     "1034": {
       "nome": "CORONA ZERO LN 330ML",
-      "categoria": "CERVEJAS",
+      "categoria": "CERVEJAS ZERO ALCOOL",
       "filiais": {
         "GRACA": { "custo": 6.31, "preco_venda": 11.00 },
         "MUCAMBO": { "custo": 6.50, "preco_venda": 11.00 },
@@ -581,4 +581,5 @@
       }
     }
   }
+
 }
